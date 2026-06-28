@@ -1,0 +1,6 @@
+{
+  "name": "Tornado Fibra - Painel de Vendas e ERP",
+  "description": "Sistema de gestão e portal de vendas do provedor Tornado Fibra com seleção de planos de ultravelocidade, consulta CEP, gestão de faturas, pesquisa avançada de assinaturas e acompanhamento de métricas de receita (MRR).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
