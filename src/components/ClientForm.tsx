@@ -24,6 +24,7 @@ const INITIAL_FORM_STATE = {
   status: 'Ativo' as ClientStatus,
   additionalServices: [] as string[],
   naturalidade: '',
+  birthDate: '',
   fatherName: '',
   motherName: '',
   addressReference: '',
@@ -53,6 +54,7 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
         status: editingClient.status,
         additionalServices: editingClient.additionalServices,
         naturalidade: editingClient.naturalidade || '',
+        birthDate: editingClient.birthDate || '',
         fatherName: editingClient.fatherName || '',
         motherName: editingClient.motherName || '',
         addressReference: editingClient.addressReference || '',
@@ -367,8 +369,20 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
               />
             </div>
 
-            {/* Espaço reservado para alinhamento */}
-            <div className="hidden sm:block"></div>
+            {/* Data de Nascimento */}
+            <div>
+              <label htmlFor="birthDate-input" className="block text-xs font-semibold text-slate-700 mb-1">
+                Data de Nascimento
+              </label>
+              <input
+                id="birthDate-input"
+                type="date"
+                name="birthDate"
+                value={formData.birthDate}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-hidden transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"
+              />
+            </div>
 
             {/* Filiação: Nome da Mãe */}
             <div>

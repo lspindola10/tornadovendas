@@ -45,6 +45,7 @@ export interface Client {
   selfRegistered?: boolean;
   isNewNotification?: boolean;
   naturalidade?: string;
+  birthDate?: string;
   fatherName?: string;
   motherName?: string;
   addressReference?: string;
