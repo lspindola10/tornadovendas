@@ -153,7 +153,7 @@ export const INITIAL_CLIENTS: Client[] = [
   {
     id: 'cl-4',
     name: 'Diego Souza Cruz',
-    cpf: '456.789-012-33',
+    cpf: '456.789.012-33',
     phone: '(41) 98877-6655',
     email: 'diego.s@exemplo.com',
     cep: '80020-100',
