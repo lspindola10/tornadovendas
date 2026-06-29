@@ -39,6 +39,11 @@ export default function App() {
 
   // Sincronização em Tempo Real com Firestore
   useEffect(() => {
+    // Solicita permissão para notificações do sistema (desktop/mobile)
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('mode') === 'cliente' || params.get('portal') === 'true') {
       setIsSharedPortal(true);
@@ -101,10 +106,17 @@ export default function App() {
           newClients.forEach((newC) => {
             playNotificationSound();
             const planInfo = PLANS.find((p) => p.id === newC.planId);
-            triggerToast(
-              `Notificação: O cliente "${newC.name}" realizou cadastro no plano ${planInfo?.speed || 'Turbinado'}!`,
-              'success'
-            );
+            const mensagem = `Notificação: O cliente "${newC.name}" realizou cadastro no plano ${planInfo?.speed || 'Turbinado'}!`;
+            
+            triggerToast(mensagem, 'success');
+
+            // Dispara a Notificação Nativa do Computador se tiver permissão
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('Tornado Fibra - Novo Cadastro!', {
+                body: `O cliente "${newC.name}" solicitou o plano de ${planInfo?.speed || 'Internet'}. Verifique o painel para agendar a instalação!`,
+                requireInteraction: true // A notificação fica na tela até ser fechada ou clicada
+              });
+            }
           });
         }
       } else {
