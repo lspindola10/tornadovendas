@@ -100,27 +100,33 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
                 </div>
               </div>
 
-              {appUser && (
-                <div className="flex items-center gap-3 pl-0 lg:pl-3 lg:border-l border-blue-500/50">
-                  <div className="text-right hidden sm:block text-xs">
-                    <span className="block font-bold text-white">{appUser.name}</span>
-                    <span className="block text-[10px] text-blue-200 flex items-center justify-end gap-1">
-                      {appUser.role === 'admin' && <ShieldCheck className="w-3 h-3 text-amber-400" />}
-                      {appUser.role === 'admin' ? 'Administrador' : 'Funcionário'}
-                    </span>
-                  </div>
-                  <div className="w-9 h-9 rounded-full bg-blue-500 border border-blue-400 flex items-center justify-center font-bold text-white shadow-sm">
-                    {appUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <button
-                    onClick={logout}
-                    className="p-2 bg-blue-700 hover:bg-blue-800 border border-blue-500 rounded-lg text-blue-100 transition-colors"
-                    title="Sair do sistema"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+              {/* Informações do Usuário e Botão de Sair */}
+              <div className="flex items-center gap-3 pl-0 lg:pl-3 lg:border-l border-blue-500/50">
+                {appUser && (
+                  <>
+                    <div className="text-right hidden sm:block text-xs">
+                      <span className="block font-bold text-white">{appUser.name}</span>
+                      <span className="block text-[10px] text-blue-200 flex items-center justify-end gap-1">
+                        {appUser.role === 'admin' && <ShieldCheck className="w-3 h-3 text-amber-400" />}
+                        {appUser.role === 'admin' ? 'Administrador' : 'Funcionário'}
+                      </span>
+                    </div>
+                    <div className="w-9 h-9 rounded-full bg-blue-500 border border-blue-400 flex items-center justify-center font-bold text-white shadow-sm">
+                      {appUser.name.charAt(0).toUpperCase()}
+                    </div>
+                  </>
+                )}
+                
+                {/* Botão de Sair SEMPRE aparece se o usuário estiver logado */}
+                <button
+                  onClick={logout}
+                  className="p-2 bg-blue-700 hover:bg-blue-800 border border-blue-500 rounded-lg text-blue-100 transition-colors flex items-center gap-2 font-bold text-xs"
+                  title="Sair do sistema"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sair</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

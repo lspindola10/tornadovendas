@@ -42,9 +42,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           userDocRef, 
           (docSnap) => {
             if (docSnap.exists()) {
-              setAppUser(docSnap.data() as AppUser);
+              const data = docSnap.data() as AppUser;
+              
+              // Correção automática do nome caso tenha sido salvo como "Administrador"
+              if (user.email === MASTER_ADMIN_EMAIL && data.name === 'Administrador') {
+                const updatedName = 'Leonardo Spíndola';
+                import('firebase/firestore').then(({ updateDoc }) => {
+                  updateDoc(userDocRef, { name: updatedName });
+                });
+                data.name = updatedName;
+              }
+              
+              setAppUser(data);
             } else {
-              setAppUser(null);
+              // Se não existir o documento, mas for o Administrador Mestre logando, cria automaticamente.
+              if (user.email === MASTER_ADMIN_EMAIL) {
+                const newAppUser: AppUser = {
+                  id: user.uid,
+                  email: user.email,
+                  name: 'Leonardo Spíndola',
+                  role: 'admin',
+                  status: 'approved',
+                  createdAt: new Date().toISOString()
+                };
+                setDoc(userDocRef, newAppUser);
+                setAppUser(newAppUser);
+              } else {
+                setAppUser(null);
+              }
             }
             setLoading(false);
           },
