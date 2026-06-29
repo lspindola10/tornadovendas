@@ -10,7 +10,7 @@ import UserManagement from './components/UserManagement';
 import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
-import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy } from 'lucide-react';
+import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut } from 'lucide-react';
 
 export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -23,7 +23,7 @@ export default function App() {
   const [notificationClient, setNotificationClient] = useState<Client | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   
-  const { currentUser, appUser, loading } = useAuth();
+  const { currentUser, appUser, loading, logout } = useAuth();
 
   const isFirstLoad = useRef(true);
   const previousClientsRef = useRef<Client[]>([]);
@@ -246,10 +246,21 @@ export default function App() {
     if (appUser?.status === 'rejected') {
       return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-          <div className="bg-white p-8 rounded-2xl max-w-md text-center space-y-4">
-            <X className="w-12 h-12 text-rose-500 mx-auto" />
-            <h2 className="text-xl font-bold text-slate-900">Acesso Bloqueado</h2>
-            <p className="text-slate-600">Sua conta foi desativada pelo administrador.</p>
+          <div className="bg-white p-8 rounded-2xl max-w-md w-full text-center space-y-6">
+            <div className="mx-auto w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center">
+              <X className="w-10 h-10 text-rose-500" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-slate-900">Acesso Bloqueado</h2>
+              <p className="text-slate-600 text-sm">Sua conta foi desativada pelo administrador. Se achar que isso é um erro, entre em contato com o suporte.</p>
+            </div>
+            <button
+              onClick={logout}
+              className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all border border-slate-300"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair e Voltar ao Login
+            </button>
           </div>
         </div>
       );

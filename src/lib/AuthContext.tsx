@@ -38,14 +38,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Escutar alterações no documento do usuário no Firestore
         const userDocRef = doc(db, 'users', user.uid);
         
-        const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setAppUser(docSnap.data() as AppUser);
-          } else {
+        const unsubscribeSnapshot = onSnapshot(
+          userDocRef, 
+          (docSnap) => {
+            if (docSnap.exists()) {
+              setAppUser(docSnap.data() as AppUser);
+            } else {
+              setAppUser(null);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Erro de permissão no Firestore:", error);
+            // Previne tela de loading infinita caso as Regras do Firestore bloqueiem
             setAppUser(null);
+            setLoading(false);
           }
-          setLoading(false);
-        });
+        );
 
         return () => unsubscribeSnapshot();
       } else {
