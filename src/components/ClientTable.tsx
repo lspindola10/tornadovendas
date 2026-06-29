@@ -251,7 +251,21 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
 
                     {/* Status do Cliente */}
                     <td className="py-4 px-4 text-center">
-                      {getStatusBadge(client.status)}
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        {getStatusBadge(client.status)}
+                        {client.status === 'Pendente' && client.phone && (
+                          <a
+                            href={`https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Obrigado por escolher a TORNADO FIBRA.\nSeu cadastro já foi processado com sucesso e sua instalação será realizada em até 24 horas.\n\nAguarde nosso contato. Assim que o técnico estiver a caminho da sua residência, avisaremos a você.\n\nTORNADO FIBRA — Conectando você ao Mundo.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] hover:bg-[#1EBE5A] text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors shadow-sm shadow-[#25D366]/20"
+                            title="Enviar mensagem no WhatsApp"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
+                            Notificar Cliente
+                          </a>
+                        )}
+                      </div>
                     </td>
 
                     {/* Ações (Editar, Detalhes, Deletar, Bloquear/Ativar rápidos) */}
