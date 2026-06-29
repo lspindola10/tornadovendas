@@ -194,12 +194,12 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/75 border-b border-slate-150 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                <th className="py-3 px-4">Nome & Contato</th>
-                <th className="py-3 px-4 text-center">Plano Ativo</th>
-                <th className="py-3 px-4 text-center">Mensalidade</th>
-                <th className="py-3 px-4 text-center">Vencimento</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Ações</th>
+                <th className="py-3 px-4 w-full">Nome & Contato</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Plano Ativo</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Mensalidade</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Vencimento</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right w-1 whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -227,7 +227,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                     </td>
 
                     {/* Plano Ativo */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
                       <div className="inline-flex flex-col items-center justify-center">
                         <span className={`inline-block text-[10px] font-extrabold px-2.5 py-0.5 rounded-md ${planDetails.badgeBg}`}>
                           {planDetails.speed}
@@ -237,12 +237,12 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                     </td>
 
                     {/* Preço do plano */}
-                    <td className="py-4 px-4 text-center font-bold text-slate-900">
+                    <td className="py-4 px-2 text-center font-bold text-slate-900 whitespace-nowrap">
                       R$ {planDetails.price.toFixed(2)}
                     </td>
 
                     {/* Vencimento da Fatura */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono text-slate-700 bg-slate-55 border border-slate-200/90 px-2 py-1 rounded">
                         <Calendar className="w-3.5 h-3.5 text-slate-500" />
                         Dia {client.dueDate}
@@ -250,7 +250,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                     </td>
 
                     {/* Status do Cliente */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
                       <div className="flex flex-col items-center justify-center gap-2">
                         {getStatusBadge(client.status)}
                         {client.status === 'Pendente' && client.phone && (
@@ -258,7 +258,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                             href={`https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Obrigado por escolher a TORNADO FIBRA.\nSeu cadastro já foi processado com sucesso e sua instalação será realizada em até 24 horas.\n\nAguarde nosso contato. Assim que o técnico estiver a caminho da sua residência, avisaremos a você.\n\nTORNADO FIBRA — Conectando você ao Mundo.`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] hover:bg-[#1EBE5A] text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors shadow-sm shadow-[#25D366]/20"
+                            className="inline-flex items-center justify-center w-full gap-1.5 px-2 py-1.5 bg-[#25D366] hover:bg-[#1EBE5A] text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors shadow-sm shadow-[#25D366]/20 whitespace-nowrap"
                             title="Enviar mensagem no WhatsApp"
                           >
                             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
@@ -269,7 +269,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                     </td>
 
                     {/* Ações (Editar, Detalhes, Deletar, Bloquear/Ativar rápidos) */}
-                    <td className="py-4 px-4 text-right">
+                    <td className="py-4 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
                         
                         {/* Botão rápido para detalhar endereço */}

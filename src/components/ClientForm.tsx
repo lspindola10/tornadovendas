@@ -245,17 +245,6 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
           </div>
         </div>
         
-        {!editingClient && (
-          <button
-            type="button"
-            onClick={handlePresetFill}
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 px-2.5 py-1.5 rounded-lg transition-colors border border-cyan-500/25 cursor-pointer animate-pulse-slow"
-            title="Preenche dados exemplo para demonstração rápida"
-          >
-            <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
-            Preenchimento Rápido
-          </button>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6 text-left bg-white">
