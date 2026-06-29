@@ -100,6 +100,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
   const [dueDate, setDueDate] = useState<DueDate>(10);
   const [additionalServices, setAdditionalServices] = useState<string[]>([]);
   const [naturalidade, setNaturalidade] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [fatherName, setFatherName] = useState('');
   const [motherName, setMotherName] = useState('');
   const [addressReference, setAddressReference] = useState('');
@@ -183,6 +184,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
     setCity('São Paulo - SP');
     setDueDate(15);
     setNaturalidade('São Paulo - SP');
+    setBirthDate('1985-06-15');
     setFatherName('Roberto de Souza');
     setMotherName('Lúcia de Souza');
     setAddressReference('Perto do metrô MASP Trianon');
@@ -260,6 +262,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
       selfRegistered: true,
       isNewNotification: true,
       naturalidade,
+      birthDate,
       fatherName,
       motherName,
       addressReference
@@ -292,6 +295,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
     setAdditionalServices([]);
     setRegisteredClient(null);
     setNaturalidade('');
+    setBirthDate('');
     setFatherName('');
     setMotherName('');
     setAddressReference('');
@@ -796,8 +800,19 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                 />
               </div>
 
-              {/* Espaço ou outro campo para alinhar */}
-              <div className="hidden sm:block"></div>
+              {/* Data de Nascimento */}
+              <div className="space-y-1.5 col-span-1">
+                <label htmlFor="wizard-birthDate" className="block text-xs font-medium text-slate-700">
+                  Data de Nascimento:
+                </label>
+                <input
+                  id="wizard-birthDate"
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900"
+                />
+              </div>
 
               {/* Nome da Mãe */}
               <div className="col-span-1 sm:col-span-2 space-y-1.5">

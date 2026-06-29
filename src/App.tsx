@@ -587,6 +587,7 @@ export default function App() {
                   <p className="text-slate-700"><strong>CPF:</strong> <span className="font-bold text-slate-900">{notificationClient.cpf}</span></p>
                   <p className="text-slate-700"><strong>Telefone:</strong> <span className="font-bold text-slate-900">{notificationClient.phone}</span></p>
                   <p className="text-slate-700"><strong>E-mail:</strong> <span className="font-bold text-slate-900 text-xs block truncate" title={notificationClient.email}>{notificationClient.email}</span></p>
+                  {notificationClient.birthDate && <p className="text-slate-700"><strong>Nascimento:</strong> <span className="font-bold text-slate-900">{notificationClient.birthDate.split('-').reverse().join('/')}</span></p>}
                 </div>
               </div>
 

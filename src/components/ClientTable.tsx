@@ -416,6 +416,9 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                 {selectedClientDetail.naturalidade && (
                   <p className="text-slate-800"><strong>Naturalidade:</strong> {selectedClientDetail.naturalidade}</p>
                 )}
+                {selectedClientDetail.birthDate && (
+                  <p className="text-slate-800"><strong>Nascimento:</strong> {selectedClientDetail.birthDate.split('-').reverse().join('/')}</p>
+                )}
                 {(selectedClientDetail.motherName || selectedClientDetail.fatherName) && (
                   <div className="text-slate-800 text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-150 mt-1">
                     <span className="text-[10px] text-slate-450 uppercase font-bold tracking-wider block mb-1">Filiação</span>
