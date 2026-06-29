@@ -2,6 +2,18 @@ export type PlanId = '100M' | '300M' | '500M' | '600M' | '1G';
 export type DueDate = 5 | 10 | 15 | 20 | 25;
 export type ClientStatus = 'Ativo' | 'Pendente' | 'Bloqueado';
 
+export type UserRole = 'admin' | 'employee';
+export type UserStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+}
+
 export interface Plan {
   id: PlanId;
   name: string;

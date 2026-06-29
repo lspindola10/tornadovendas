@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Wifi, Router, Clock, Database, Check } from 'lucide-react';
+import { Wifi, Router, Clock, Database, Check, LogOut, ShieldCheck } from 'lucide-react';
 import logoImg from '../assets/logo.png';
+import { useAuth } from '../lib/AuthContext';
 
 interface HeaderProps {
   clientCount: number;
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 export default function Header({ clientCount, totalMrr, isAdmin = true }: HeaderProps) {
   const [time, setTime] = useState<string>('');
+  const { appUser, logout } = useAuth();
 
   useEffect(() => {
     const updateTime = () => {
@@ -79,8 +81,8 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
               </span>
             </div>
           ) : (
-            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-sm">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-700/50 border border-blue-500/40">
+            <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 text-sm">
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-700/50 border border-blue-500/40">
                 <Router className="w-4 h-4 text-cyan-300" />
                 <div className="text-xs">
                   <span className="text-blue-150 block text-[9px] uppercase font-mono tracking-wider text-blue-200">Assinantes</span>
@@ -88,7 +90,7 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-700/50 border border-blue-500/40">
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-700/50 border border-blue-500/40">
                 <Database className="w-4 h-4 text-indigo-200" />
                 <div className="text-xs">
                   <span className="text-blue-150 block text-[9px] uppercase font-mono tracking-wider text-blue-200">Faturamento</span>
@@ -98,10 +100,27 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
                 </div>
               </div>
 
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-700/30 text-blue-100 border border-transparent">
-                <Clock className="w-4 h-4 text-emerald-300" />
-                <span className="text-xs font-mono">{time}</span>
-              </div>
+              {appUser && (
+                <div className="flex items-center gap-3 pl-0 lg:pl-3 lg:border-l border-blue-500/50">
+                  <div className="text-right hidden sm:block text-xs">
+                    <span className="block font-bold text-white">{appUser.name}</span>
+                    <span className="block text-[10px] text-blue-200 flex items-center justify-end gap-1">
+                      {appUser.role === 'admin' && <ShieldCheck className="w-3 h-3 text-amber-400" />}
+                      {appUser.role === 'admin' ? 'Administrador' : 'Funcionário'}
+                    </span>
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-blue-500 border border-blue-400 flex items-center justify-center font-bold text-white shadow-sm">
+                    {appUser.name.charAt(0).toUpperCase()}
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="p-2 bg-blue-700 hover:bg-blue-800 border border-blue-500 rounded-lg text-blue-100 transition-colors"
+                    title="Sair do sistema"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

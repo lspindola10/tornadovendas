@@ -4,6 +4,10 @@ import MetricCard from './components/MetricCard';
 import ClientForm from './components/ClientForm';
 import ClientTable from './components/ClientTable';
 import CustomerPortal from './components/CustomerPortal';
+import LoginScreen from './components/LoginScreen';
+import PendingApproval from './components/PendingApproval';
+import UserManagement from './components/UserManagement';
+import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
 import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy } from 'lucide-react';
@@ -13,11 +17,13 @@ export default function App() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' | 'danger' } | null>(null);
   
-  // Toggle entre o Portal do Cliente (Inscrição Autônoma) e ERP Administrativo (Provedor)
-  const [viewMode, setViewMode] = useState<'customer' | 'admin'>('customer');
+  // Toggle entre o Portal do Cliente (Inscrição Autônoma), ERP Administrativo (Provedor) e Gestão de Usuários
+  const [viewMode, setViewMode] = useState<'customer' | 'admin' | 'users'>('admin'); // Padrão é admin para funcionários logados
   const [isSharedPortal, setIsSharedPortal] = useState(false);
   const [notificationClient, setNotificationClient] = useState<Client | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  
+  const { currentUser, appUser, loading } = useAuth();
 
   const isFirstLoad = useRef(true);
   const previousClientsRef = useRef<Client[]>([]);
@@ -219,6 +225,37 @@ export default function App() {
     }, 0);
   };
 
+  // Verifica Autenticação primeiro
+  if (!isSharedPortal) {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
+    if (!currentUser) {
+      return <LoginScreen />;
+    }
+
+    if (appUser?.status === 'pending') {
+      return <PendingApproval />;
+    }
+    
+    if (appUser?.status === 'rejected') {
+      return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl max-w-md text-center space-y-4">
+            <X className="w-12 h-12 text-rose-500 mx-auto" />
+            <h2 className="text-xl font-bold text-slate-900">Acesso Bloqueado</h2>
+            <p className="text-slate-600">Sua conta foi desativada pelo administrador.</p>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950 font-sans flex flex-col" id="app-root-container">
       
@@ -240,7 +277,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/80 gap-1 overflow-hidden">
+            <div className="flex items-center flex-wrap rounded-xl bg-slate-100 p-1 border border-slate-200/80 gap-1 overflow-hidden">
               
               {/* Botão de Vista do Cliente */}
               <button
@@ -270,6 +307,21 @@ export default function App() {
                 <Monitor className="w-4 h-4 text-orange-600" />
                 Painel Interno (ERP Provedor)
               </button>
+              
+              {/* Botão Gestão de Usuários (Apenas Admin) */}
+              {appUser?.role === 'admin' && (
+                <button
+                  onClick={() => setViewMode('users')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-black transition-all cursor-pointer uppercase text-[10px] tracking-wider ${
+                    viewMode === 'users'
+                      ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-purple-700 text-white shadow-lg shadow-indigo-500/20'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-600" />
+                  Gestão de Equipe
+                </button>
+              )}
 
             </div>
 
@@ -307,6 +359,11 @@ export default function App() {
         {viewMode === 'customer' ? (
           <div className="animate-fade-in space-y-6">
             <CustomerPortal onRegisterSuccess={handleClientSelfSubscribe} />
+          </div>
+        ) : viewMode === 'users' ? (
+          /* MODO GESTÃO DE USUÁRIOS */
+          <div className="animate-fade-in space-y-6">
+            <UserManagement />
           </div>
         ) : (
           /* MODO ERP ADMINISTRATIVO (Gestão e faturamento) */
