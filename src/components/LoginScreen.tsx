@@ -19,14 +19,22 @@ export default function LoginScreen() {
     setError(null);
     setIsLoading(true);
 
+    const formatAuthEmail = (input: string) => {
+      const trimmed = input.trim();
+      if (trimmed.includes('@')) return trimmed;
+      const formatted = trimmed.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return `${formatted}@app.tornadofibra.com`;
+    };
+
     try {
+      const authEmail = formatAuthEmail(email);
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, authEmail, password);
       } else {
         if (!name.trim()) {
           throw new Error('Por favor, informe seu nome completo.');
         }
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
         await registerAppUser(userCredential.user, name);
       }
     } catch (err: any) {
@@ -94,18 +102,20 @@ export default function LoginScreen() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Usuário/E-mail</label>
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                {!isLogin ? 'Crie seu Usuário' : 'Usuário / E-mail'}
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 text-slate-400" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-hidden"
-                  placeholder="seu@email.com"
+                  placeholder="Nome de usuário ou e-mail"
                 />
               </div>
             </div>
