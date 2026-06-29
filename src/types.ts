@@ -49,6 +49,7 @@ export interface Client {
   fatherName?: string;
   motherName?: string;
   addressReference?: string;
+  registeredBy?: string;
 }
 
 export const PLANS: Plan[] = [

@@ -139,8 +139,14 @@ export default function App() {
   const handleSaveClient = async (savedClient: Client) => {
     try {
       const exists = clients.some(c => c.id === savedClient.id);
-      const docRef = doc(db, 'clients', savedClient.id);
-      await setDoc(docRef, savedClient);
+      
+      const clientToSave = { ...savedClient };
+      if (!exists && !clientToSave.selfRegistered) {
+        clientToSave.registeredBy = appUser?.name || 'Admin';
+      }
+
+      const docRef = doc(db, 'clients', clientToSave.id);
+      await setDoc(docRef, clientToSave);
       
       if (exists) {
         triggerToast(`Cadastro de "${savedClient.name}" atualizado com sucesso!`, 'info');

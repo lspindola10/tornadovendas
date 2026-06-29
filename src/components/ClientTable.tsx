@@ -195,6 +195,8 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
             <thead>
               <tr className="bg-slate-50/75 border-b border-slate-150 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                 <th className="py-3 px-4 w-full">Nome & Contato</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Data do Cadastro</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Origem</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Plano Ativo</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Mensalidade</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Vencimento</th>
@@ -223,6 +225,34 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                         <p className="text-[11px] text-slate-450 font-sans">
                           {client.email}
                         </p>
+                      </div>
+                    </td>
+
+                    {/* Data do Cadastro */}
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-[11px] font-bold text-slate-700">
+                          {new Date(client.createdAt).toLocaleDateString('pt-BR')}
+                        </span>
+                        <span className="text-[10px] text-slate-500 mt-0.5">
+                          <Clock className="w-2.5 h-2.5 inline mr-1" />
+                          {new Date(client.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Origem */}
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                      <div className="inline-flex flex-col items-center justify-center">
+                        {client.selfRegistered ? (
+                          <span className="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-orange-50 text-orange-600 border border-orange-200">
+                            Auto Atendimento
+                          </span>
+                        ) : (
+                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
+                            Usuário: {client.registeredBy || 'Sistema'}
+                          </span>
+                        )}
                       </div>
                     </td>
 
