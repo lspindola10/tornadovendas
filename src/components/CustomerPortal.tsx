@@ -135,6 +135,13 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
     return `${raw.slice(0, 5)}-${raw.slice(5, 8)}`;
   };
 
+  const applyDateMask = (value: string) => {
+    const raw = value.replace(/\D/g, '');
+    if (raw.length <= 2) return raw;
+    if (raw.length <= 4) return `${raw.slice(0, 2)}/${raw.slice(2)}`;
+    return `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4, 8)}`;
+  };
+
   const handleCepLookup = async (cepVal: string) => {
     const sanitized = cepVal.replace(/\D/g, '');
     if (sanitized.length !== 8) return;
@@ -807,9 +814,11 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                 </label>
                 <input
                   id="wizard-birthDate"
-                  type="date"
+                  type="text"
+                  maxLength={10}
+                  placeholder="DD/MM/AAAA"
                   value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
+                  onChange={(e) => setBirthDate(applyDateMask(e.target.value))}
                   className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900"
                 />
               </div>

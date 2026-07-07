@@ -89,6 +89,14 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
     return `${raw.slice(0, 5)}-${raw.slice(5, 8)}`;
   };
 
+  // Função para aplicar máscara na Data de Nascimento (DD/MM/YYYY)
+  const formatDate = (value: string) => {
+    const raw = value.replace(/\D/g, '');
+    if (raw.length <= 2) return raw;
+    if (raw.length <= 4) return `${raw.slice(0, 2)}/${raw.slice(2)}`;
+    return `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4, 8)}`;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
@@ -99,6 +107,8 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
       formattedValue = formatPhone(value);
     } else if (name === 'cep') {
       formattedValue = formatCEP(value);
+    } else if (name === 'birthDate') {
+      formattedValue = formatDate(value);
     }
 
     setFormData(prev => ({
@@ -376,8 +386,10 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
               </label>
               <input
                 id="birthDate-input"
-                type="date"
+                type="text"
+                maxLength={10}
                 name="birthDate"
+                placeholder="DD/MM/AAAA"
                 value={formData.birthDate}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-hidden transition-all focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20"

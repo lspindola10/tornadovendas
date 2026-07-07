@@ -45,9 +45,12 @@ export default function App() {
     }
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get('mode') === 'cliente' || params.get('portal') === 'true') {
+    const isCustomerMode = params.get('mode') === 'cliente' || params.get('portal') === 'true';
+    if (isCustomerMode) {
       setIsSharedPortal(true);
       setViewMode('customer');
+      // No modo cliente (portal público), não tentamos ler a lista de clientes para evitar erro de permissão e proteger a privacidade.
+      return;
     }
 
     const playNotificationSound = () => {
@@ -127,7 +130,8 @@ export default function App() {
       setClients(list);
       localStorage.setItem('conecta_fiber_clients', JSON.stringify(list));
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'clients');
+      // Apenas ignora em vez de dar throw se for erro de permissão no onSnapshot
+      console.error('Erro no onSnapshot:', error);
     });
 
     return () => {
@@ -172,8 +176,9 @@ export default function App() {
       };
       await setDoc(docRef, clientWithProps);
       triggerToast(`Olá ${newClient.name}! Sua solicitação de banda larga Fibra foi enviada para o faturamento!`, 'success');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'clients');
+    } catch (error: any) {
+      console.error("Erro ao salvar cadastro do cliente:", error);
+      triggerToast('Ocorreu um erro de permissão ao salvar seu cadastro. Contate o provedor.', 'danger');
     }
   };
 
