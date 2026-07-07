@@ -410,24 +410,25 @@ export default function App() {
 
             {/* Alerta de Novos Cadastros via Portal de Autoatendimento */}
             {clients.some(c => c.isNewNotification) && (
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50/40 to-blue-50/50 border border-blue-200 rounded-2xl p-5 shadow-xs space-y-3.5 animate-pulse">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-100/70 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
+              <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 border-2 border-red-400 rounded-2xl p-5 shadow-xl shadow-orange-500/30 space-y-4 relative overflow-hidden animate-pulse">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl -mt-10 -mr-10"></div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/20 pb-4 relative z-10">
+                  <div className="flex items-center gap-3.5">
+                    <span className="relative flex h-5 w-5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-100"></span>
+                      <span className="relative inline-flex rounded-full h-5 w-5 bg-yellow-400 border-2 border-white"></span>
                     </span>
                     <div className="text-left">
-                      <h3 className="text-sm font-extrabold text-slate-900 font-sans flex items-center gap-1.5Box">
-                        Novos Clientes Cadastrados pelo Portal! ({clients.filter(c => c.isNewNotification).length})
+                      <h3 className="text-lg font-black text-white font-sans flex items-center gap-1.5 drop-shadow-md">
+                        NOVO CADASTRO RECEBIDO! ({clients.filter(c => c.isNewNotification).length})
                       </h3>
-                      <p className="text-xs text-slate-500 font-sans">
-                        Seus clientes preencheram o autoatendimento. Clique para acessar o cadastro completo e ativar a fibra.
+                      <p className="text-sm text-orange-50 font-sans font-bold drop-shadow-sm">
+                        Um cliente preencheu o formulário de Autoatendimento. Atenda imediatamente!
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold bg-blue-150 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200/50">
-                    Ação Requerida
+                  <span className="text-xs font-black bg-white text-red-600 px-3.5 py-1.5 rounded-full shadow-lg border border-red-100 uppercase tracking-widest animate-bounce mt-2 sm:mt-0">
+                    URGENTE
                   </span>
                 </div>
 
