@@ -80,17 +80,6 @@ export default function App() {
     const q = query(clientsCollectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
-      if (snapshot.empty) {
-        console.log('Semeando clientes iniciais no Firestore...');
-        try {
-          for (const client of INITIAL_CLIENTS) {
-            await setDoc(doc(db, 'clients', client.id), client);
-          }
-        } catch (err) {
-          console.error('Erro ao semear dados no Firestore:', err);
-        }
-        return;
-      }
 
       const list: Client[] = [];
       snapshot.forEach((d) => {

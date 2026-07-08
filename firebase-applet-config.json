@@ -1,10 +1,10 @@
 {
-  "projectId": "gen-lang-client-0370782824",
-  "appId": "1:1008130657262:web:34eaddc0c61894983bdcff",
-  "apiKey": "AIzaSyDeiZfGW0PrLKiFLIDWia2rrOiMCz5RYI4",
-  "authDomain": "gen-lang-client-0370782824.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-50052adf-b13e-4e58-afd1-9009b939dd6f",
-  "storageBucket": "gen-lang-client-0370782824.firebasestorage.app",
-  "messagingSenderId": "1008130657262",
+  "projectId": "cadastros-tornado-fibra",
+  "appId": "1:154280462692:web:66ffa997dbb35b84ab9271",
+  "apiKey": "AIzaSyBFqENhRmJ-vTS8HPuqT9xLX9XI-wkl-J8",
+  "authDomain": "cadastros-tornado-fibra.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "cadastros-tornado-fibra.firebasestorage.app",
+  "messagingSenderId": "154280462692",
   "measurementId": ""
 }

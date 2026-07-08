@@ -31,6 +31,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app, config.firestoreDatabaseId);
 const auth = getAuth(app);
 
+// Secondary app for background user creation without signing out the main admin
+const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
+const secondaryAuth = getAuth(secondaryApp);
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',
@@ -81,6 +85,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 export { 
   db, 
   auth,
+  secondaryAuth,
   collection, 
   doc, 
   onSnapshot, 

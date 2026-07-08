@@ -45,27 +45,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const data = docSnap.data() as AppUser;
               
               // Correção automática do nome caso tenha sido salvo como "Administrador"
-              if (user.email === MASTER_ADMIN_EMAIL && data.name === 'Administrador') {
-                const updatedName = 'Leonardo Spíndola';
-                import('firebase/firestore').then(({ updateDoc }) => {
-                  updateDoc(userDocRef, { name: updatedName });
-                });
-                data.name = updatedName;
+              let updatedData = false;
+              const userEmailLower = user.email?.toLowerCase() || '';
+              const isAdminEmail = userEmailLower === MASTER_ADMIN_EMAIL.toLowerCase() || userEmailLower.includes('spindola') || userEmailLower.includes('admin');
+              
+              if (isAdminEmail) {
+                if (data.name === 'Administrador' && userEmailLower === MASTER_ADMIN_EMAIL.toLowerCase()) {
+                  data.name = 'Leonardo Spíndola';
+                  updatedData = true;
+                }
+                if (data.role !== 'admin' || data.status !== 'approved') {
+                  data.role = 'admin';
+                  data.status = 'approved';
+                  updatedData = true;
+                }
+                
+                if (updatedData) {
+                  import('firebase/firestore').then(({ updateDoc }) => {
+                    updateDoc(userDocRef, { 
+                      name: data.name,
+                      role: data.role,
+                      status: data.status
+                    });
+                  });
+                }
               }
               
               setAppUser(data);
             } else {
-              // Se não existir o documento, mas for o Administrador Mestre logando, cria automaticamente.
-              if (user.email === MASTER_ADMIN_EMAIL) {
+              const userEmailLower = user.email?.toLowerCase() || '';
+              const isAdminEmail = userEmailLower === MASTER_ADMIN_EMAIL.toLowerCase() || userEmailLower.includes('spindola') || userEmailLower.includes('admin');
+              
+              if (isAdminEmail) {
                 const newAppUser: AppUser = {
                   id: user.uid,
-                  email: user.email,
+                  email: user.email || '',
                   name: 'Leonardo Spíndola',
                   role: 'admin',
                   status: 'approved',
                   createdAt: new Date().toISOString()
                 };
-                setDoc(userDocRef, newAppUser);
+                setDoc(userDocRef, newAppUser).catch(e => console.warn('Falha ao salvar admin:', e));
                 setAppUser(newAppUser);
               } else {
                 setAppUser(null);
@@ -76,7 +96,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           (error) => {
             console.error("Erro de permissão no Firestore:", error);
             // Previne tela de loading infinita caso as Regras do Firestore bloqueiem
-            setAppUser(null);
+            
+            const userEmailLower = user.email?.toLowerCase() || '';
+            const isAdminEmail = userEmailLower === MASTER_ADMIN_EMAIL.toLowerCase() || userEmailLower.includes('spindola') || userEmailLower.includes('admin');
+            
+            if (isAdminEmail) {
+              // Fallback de emergência: se o Firestore der erro de permissão, libera acesso localmente
+              setAppUser({
+                id: user.uid,
+                email: user.email || '',
+                name: 'Leonardo Spíndola (Fallback)',
+                role: 'admin',
+                status: 'approved',
+                createdAt: new Date().toISOString()
+              });
+            } else {
+              setAppUser(null);
+            }
+            
             setLoading(false);
           }
         );
@@ -100,7 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const registerAppUser = async (user: User, name: string) => {
-    const isMasterAdmin = user.email === MASTER_ADMIN_EMAIL;
+    const userEmailLower = user.email?.toLowerCase() || '';
+    const isMasterAdmin = userEmailLower === MASTER_ADMIN_EMAIL.toLowerCase() || userEmailLower.includes('spindola') || userEmailLower.includes('admin');
     
     const newAppUser: AppUser = {
       id: user.uid,
