@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { db, handleFirestoreError, OperationType, secondaryAuth } from '../lib/firebase';
 import { AppUser, UserStatus } from '../types';
-import { ShieldCheck, UserCheck, UserX, Clock, Search, Plus, X, Loader2 } from 'lucide-react';
+import { ShieldCheck, UserCheck, UserX, Clock, Search, Plus, X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { collection as firestoreCollection, query as firestoreQuery, onSnapshot as firestoreOnSnapshot, doc as firestoreDoc, updateDoc as firestoreUpdateDoc, orderBy as firestoreOrderBy, setDoc as firestoreSetDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -19,6 +19,7 @@ export default function UserManagement() {
   const [newUserRole, setNewUserRole] = useState<'admin' | 'employee'>('employee');
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { appUser } = useAuth();
 
