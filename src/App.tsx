@@ -53,6 +53,13 @@ export default function App() {
       return;
     }
 
+    // Apenas tenta ler a lista de clientes se o usuário estiver autenticado
+    if (!currentUser) {
+      isFirstLoad.current = true;
+      previousClientsRef.current = [];
+      return;
+    }
+
     const playNotificationSound = () => {
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -126,7 +133,7 @@ export default function App() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [currentUser]);
 
   // Salvar cliente (Criar ou Atualizar)
   const handleSaveClient = async (savedClient: Client) => {
