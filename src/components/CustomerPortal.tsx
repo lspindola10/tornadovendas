@@ -208,6 +208,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
       if (!address.trim()) errors.address = 'Informe a rua correspondente.';
       if (!number.trim()) errors.number = 'Informe o número.';
       if (!neighborhood.trim()) errors.neighborhood = 'Informe o bairro.';
+      if (!addressReference.trim()) errors.addressReference = 'O ponto de referência é obrigatório.';
     }
 
     if (currentStep === 3) {
@@ -646,7 +647,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
               {/* Ponto de Referência */}
               <div className="sm:col-span-3 space-y-1.5">
                 <label htmlFor="wizard-addressReference" className="block text-xs font-medium text-slate-700">
-                  Ponto de Referência para Instalação:
+                  Ponto de Referência para Instalação: <span className="text-rose-500">*</span>
                 </label>
                 <input
                   id="wizard-addressReference"
@@ -656,6 +657,9 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                   placeholder="Ex: Próximo à igreja matriz, portão azul, travessa da avenida principal..."
                   className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900"
                 />
+                {validationErrors.addressReference && (
+                  <p className="text-[11px] text-rose-500">{validationErrors.addressReference}</p>
+                )}
               </div>
 
             </div>
