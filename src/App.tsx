@@ -424,7 +424,7 @@ export default function App() {
                     </div>
                   </div>
                   <span className="text-xs font-black bg-white text-red-600 px-3.5 py-1.5 rounded-full shadow-lg border border-red-100 uppercase tracking-widest animate-bounce mt-2 sm:mt-0">
-                    URGENTE
+                    ATENÇÃO
                   </span>
                 </div>
 
