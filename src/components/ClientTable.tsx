@@ -14,6 +14,8 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
   const [filterPlan, setFilterPlan] = useState<string>('todos');
   const [filterDueDate, setFilterDueDate] = useState<string>('todos');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
+  const [filterPeriod, setFilterPeriod] = useState<string>('todos');
+  const [customMonth, setCustomMonth] = useState<string>('');
   const [selectedClientDetail, setSelectedClientDetail] = useState<Client | null>(null);
 
   // Filtragem dos dados
@@ -28,7 +30,54 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
     const matchesDueDate = filterDueDate === 'todos' || client.dueDate === parseInt(filterDueDate);
     const matchesStatus = filterStatus === 'todos' || client.status === filterStatus;
 
-    return matchesSearch && matchesPlan && matchesDueDate && matchesStatus;
+    let matchesPeriod = true;
+    if (filterPeriod !== 'todos') {
+      if (!client.createdAt) {
+        matchesPeriod = false;
+      } else {
+        const clientDate = new Date(client.createdAt);
+        if (isNaN(clientDate.getTime())) {
+          matchesPeriod = false;
+        } else {
+          const now = new Date();
+          if (filterPeriod === 'hoje') {
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            matchesPeriod = clientDate >= startOfToday;
+          } else if (filterPeriod === '7dias') {
+            const startOf7Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0, 0);
+            matchesPeriod = clientDate >= startOf7Days;
+          } else if (filterPeriod === '15dias') {
+            const startOf15Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15, 0, 0, 0, 0);
+            matchesPeriod = clientDate >= startOf15Days;
+          } else if (filterPeriod === '30dias') {
+            const startOf30Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30, 0, 0, 0, 0);
+            matchesPeriod = clientDate >= startOf30Days;
+          } else if (filterPeriod === 'este-mes') {
+            matchesPeriod =
+              clientDate.getFullYear() === now.getFullYear() &&
+              clientDate.getMonth() === now.getMonth();
+          } else if (filterPeriod === 'mes-anterior') {
+            const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            matchesPeriod =
+              clientDate.getFullYear() === prevMonthDate.getFullYear() &&
+              clientDate.getMonth() === prevMonthDate.getMonth();
+          } else if (filterPeriod === 'custom-mes') {
+            if (customMonth) {
+              const [yStr, mStr] = customMonth.split('-');
+              const targetYear = parseInt(yStr, 10);
+              const targetMonth = parseInt(mStr, 10) - 1;
+              matchesPeriod =
+                clientDate.getFullYear() === targetYear &&
+                clientDate.getMonth() === targetMonth;
+            } else {
+              matchesPeriod = true;
+            }
+          }
+        }
+      }
+    }
+
+    return matchesSearch && matchesPlan && matchesDueDate && matchesStatus && matchesPeriod;
   });
 
   const getStatusBadge = (status: ClientStatus) => {
@@ -57,33 +106,77 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
     }
   };
 
-  // Função para exportar os dados visíveis como CSV simples
+  // Função para exportar os dados visíveis compatível 100% com Excel (ponto-e-vírgula e UTF-8 BOM)
   const handleExportCSV = () => {
     if (filteredClients.length === 0) return;
     
-    const headers = ['ID', 'Nome', 'CPF', 'Email', 'Telefone', 'Plano', 'Vencimento', 'Status', 'Cidade'];
-    const rows = filteredClients.map(c => [
-      c.id,
-      c.name,
-      c.cpf,
-      c.email,
-      c.phone,
-      c.planId,
-      `Dia ${c.dueDate}`,
-      c.status,
-      c.city
-    ]);
+    const headers = [
+      'ID',
+      'Nome do Cliente',
+      'CPF',
+      'Telefone',
+      'Email',
+      'Plano',
+      'Mensalidade (R$)',
+      'Vencimento',
+      'Status',
+      'Origem',
+      'Endereço',
+      'Bairro',
+      'Cidade',
+      'CEP',
+      'Data do Cadastro'
+    ];
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(','))].join('\n');
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `clientes_provedor_internet_${new Date().toISOString().split('T')[0]}.csv`);
+    const rows = filteredClients.map(c => {
+      const plan = PLANS.find(p => p.id === c.planId);
+      const planLabel = plan ? `${plan.speed} (${plan.name})` : c.planId;
+      const priceLabel = plan ? plan.price.toFixed(2).replace('.', ',') : '';
+      const origin = c.selfRegistered ? 'Auto Atendimento' : (c.registeredBy || 'Sistema');
+      const addressFull = c.address ? `${c.address}, Nº ${c.number || 'S/N'}${c.addressReference ? ` (${c.addressReference})` : ''}` : '';
+
+      return [
+        c.id,
+        c.name.trim(),
+        c.cpf,
+        c.phone,
+        c.email,
+        planLabel,
+        priceLabel,
+        `Dia ${c.dueDate}`,
+        c.status,
+        origin,
+        addressFull,
+        c.neighborhood || '',
+        c.city || '',
+        c.cep || '',
+        c.createdAt ? new Date(c.createdAt).toLocaleString('pt-BR') : ''
+      ];
+    });
+
+    const formatCell = (val: string | number | undefined | null) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).trim();
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const delimiter = ';';
+    const csvContent = [
+      headers.map(formatCell).join(delimiter),
+      ...rows.map(row => row.map(formatCell).join(delimiter))
+    ].join('\r\n');
+
+    // Adiciona BOM (\uFEFF) para forçar o Excel no Windows a abrir em UTF-8 com acentos corretos
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `clientes_tornado_fibra_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
    return (
@@ -116,6 +209,8 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                 setFilterPlan('todos');
                 setFilterDueDate('todos');
                 setFilterStatus('todos');
+                setFilterPeriod('todos');
+                setCustomMonth('');
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors cursor-pointer border border-slate-200/55"
               title="Limpar todos os filtros"
@@ -124,6 +219,57 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
               Resetar
             </button>
           </div>
+        </div>
+
+        {/* Atalhos Rápidos de Período de Cadastro */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-4 pb-3 border-b border-slate-200/70">
+          <span className="text-[11px] text-slate-500 font-bold font-sans whitespace-nowrap flex items-center gap-1 mr-1">
+            <Calendar className="w-3.5 h-3.5 text-orange-500" />
+            Cadastrado em:
+          </span>
+          {[
+            { id: 'todos', label: 'Todo o Período' },
+            { id: 'hoje', label: 'Hoje' },
+            { id: '7dias', label: 'Últimos 7 dias' },
+            { id: '15dias', label: 'Últimos 15 dias' },
+            { id: '30dias', label: 'Últimos 30 dias' },
+            { id: 'este-mes', label: 'Este Mês' },
+            { id: 'mes-anterior', label: 'Mês Anterior' },
+            { id: 'custom-mes', label: 'Escolher Mês 📅' },
+          ].map((pill) => (
+            <button
+              key={pill.id}
+              type="button"
+              onClick={() => setFilterPeriod(pill.id)}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap border ${
+                filterPeriod === pill.id
+                  ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-orange-600 shadow-xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900'
+              }`}
+            >
+              {pill.label}
+            </button>
+          ))}
+
+          {filterPeriod === 'custom-mes' && (
+            <div className="flex items-center gap-1.5 ml-1 animate-fade-in">
+              <input
+                type="month"
+                value={customMonth}
+                onChange={(e) => setCustomMonth(e.target.value)}
+                className="py-1 px-2.5 text-xs rounded-lg border border-orange-300 bg-orange-50/50 text-slate-900 font-semibold focus:outline-hidden focus:ring-2 focus:ring-orange-500/20"
+              />
+              {customMonth && (
+                <button
+                  type="button"
+                  onClick={() => setCustomMonth('')}
+                  className="text-[10px] text-slate-400 hover:text-slate-600 underline"
+                >
+                  Limpar mês
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -344,8 +490,8 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
         ) : (
           <div className="py-12 px-6 text-center bg-slate-50/50">
             <AlertTriangle className="w-10 h-10 text-orange-550 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-slate-700">Nenhum assinante encontrado para o filtro aplicado</p>
-            <p className="text-xs text-slate-500 mt-1">Experimente remover a busca ou selecionar 'Todos os Planos'</p>
+            <p className="text-sm font-semibold text-slate-700">Nenhum assinante encontrado para os filtros aplicados</p>
+            <p className="text-xs text-slate-500 mt-1">Experimente alterar o período de cadastro, remover o termo de busca ou clicar em <strong>Resetar</strong></p>
           </div>
         )}
       </div>
