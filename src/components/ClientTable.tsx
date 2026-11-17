@@ -639,31 +639,36 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
             {/* Cabeçalho do popup */}
             <div className="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800">
               <div>
-                <span className="text-[10px] font-mono tracking-widest text-cyan-400 font-bold uppercase">Ordem de Instalação Físico-Lógica</span>
-                <h4 className="text-base font-bold mt-1 text-white max-w-[280px] truncate">{selectedClientDetail.name}</h4>
+                <span className="text-[10px] font-mono tracking-widest text-emerald-400 font-black uppercase flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                  Ficha Completa de Conferência • Instalação
+                </span>
+                <h4 className="text-base font-black mt-1 text-white max-w-[280px] truncate">{selectedClientDetail.name}</h4>
               </div>
               <button 
                 onClick={() => setSelectedClientDetail(null)} 
-                className="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800 border border-slate-750 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800 border border-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Conteúdo do popup */}
-            <div className="p-6 space-y-4 text-sm text-slate-650 bg-white">
+            <div className="p-6 space-y-4 text-sm text-slate-650 bg-white max-h-[75vh] overflow-y-auto">
               
               {/* Plano e Vencimento */}
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="flex justify-between items-center p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-left">
-                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Plano Selecionado</span>
-                  <span className="text-sm font-extrabold text-cyan-600">
+                  <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block">Plano Selecionado</span>
+                  <span className="text-sm font-black text-blue-700">
                     {PLANS.find(p => p.id === selectedClientDetail.planId)?.speed} ({PLANS.find(p => p.id === selectedClientDetail.planId)?.name})
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Vencimento</span>
-                  <span className="text-sm font-black text-slate-950">Dia {selectedClientDetail.dueDate}</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Preço / Vencimento</span>
+                  <span className="text-sm font-black text-slate-900">
+                    R$ {PLANS.find(p => p.id === selectedClientDetail.planId)?.price.toFixed(2).replace('.', ',')} • Dia {selectedClientDetail.dueDate}
+                  </span>
                 </div>
               </div>
 
@@ -693,81 +698,59 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                         </span>
                       </div>
                     </div>
-                    {onSyncIxc && (
-                      <button
-                        type="button"
-                        onClick={() => handleSyncClick(selectedClientDetail)}
-                        disabled={syncingId === selectedClientDetail.id}
-                        className="mt-2.5 w-full py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        {syncingId === selectedClientDetail.id ? 'Vinculando...' : `Vincular a este Cadastro IXC (#${ixcLookupState.ixcId})`}
-                      </button>
-                    )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between mt-1">
-                    <div>
-                      <span className="text-xs text-slate-600 font-bold block">
-                        Novo Cliente (Não consta no IXC)
-                      </span>
-                    </div>
-                    {onSyncIxc && (
-                      <button
-                        type="button"
-                        onClick={() => handleSyncClick(selectedClientDetail)}
-                        disabled={syncingId === selectedClientDetail.id}
-                        className="px-3 py-1.5 text-xs font-black rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50"
-                      >
-                        <RefreshCw className={`w-3 h-3 ${syncingId === selectedClientDetail.id ? 'animate-spin' : ''}`} />
-                        {syncingId === selectedClientDetail.id ? 'Enviando...' : 'Cadastrar Novo no IXC'}
-                      </button>
-                    )}
-                  </div>
+                  <p className="text-xs text-slate-600 font-bold mt-1">
+                    Novo Cliente (Não consta cadastro prévio no IXC)
+                  </p>
                 )}
               </div>
 
               {/* Contato rápida */}
               <div className="space-y-2 text-left">
-                <span className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider block">Dados de Contato</span>
-                <p className="text-slate-800"><strong>CPF:</strong> {selectedClientDetail.cpf}</p>
-                <p className="text-slate-800"><strong>Telefone:</strong> {selectedClientDetail.phone}</p>
-                <p className="text-slate-800"><strong>E-mail:</strong> {selectedClientDetail.email}</p>
-                {selectedClientDetail.naturalidade && (
-                  <p className="text-slate-800"><strong>Naturalidade:</strong> {selectedClientDetail.naturalidade}</p>
-                )}
-                {selectedClientDetail.birthDate && (
-                  <p className="text-slate-800"><strong>Nascimento:</strong> {selectedClientDetail.birthDate.split('-').reverse().join('/')}</p>
-                )}
-                {(selectedClientDetail.motherName || selectedClientDetail.fatherName) && (
-                  <div className="text-slate-800 text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-150 mt-1">
-                    <span className="text-[10px] text-slate-450 uppercase font-bold tracking-wider block mb-1">Filiação</span>
-                    {selectedClientDetail.motherName && <p><strong>Mãe:</strong> {selectedClientDetail.motherName}</p>}
-                    {selectedClientDetail.fatherName && <p className="mt-0.5"><strong>Pai:</strong> {selectedClientDetail.fatherName}</p>}
-                  </div>
-                )}
+                <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block">Dados de Contato & Filiação</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200/70 font-sans text-xs">
+                  <p className="text-slate-800"><strong>CPF:</strong> {selectedClientDetail.cpf}</p>
+                  <p className="text-slate-800"><strong>Telefone:</strong> {selectedClientDetail.phone}</p>
+                  <p className="text-slate-800 sm:col-span-2"><strong>E-mail:</strong> {selectedClientDetail.email}</p>
+                  {selectedClientDetail.naturalidade && (
+                    <p className="text-slate-800"><strong>Naturalidade:</strong> {selectedClientDetail.naturalidade}</p>
+                  )}
+                  {selectedClientDetail.birthDate && (
+                    <p className="text-slate-800"><strong>Nascimento:</strong> {selectedClientDetail.birthDate.split('-').reverse().join('/')}</p>
+                  )}
+                  {(selectedClientDetail.motherName || selectedClientDetail.fatherName) && (
+                    <div className="sm:col-span-2 text-slate-800 text-xs bg-white p-2.5 rounded-lg border border-slate-200 mt-1">
+                      <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider block mb-1">Filiação</span>
+                      {selectedClientDetail.motherName && <p><strong>Mãe:</strong> {selectedClientDetail.motherName}</p>}
+                      {selectedClientDetail.fatherName && <p className="mt-0.5"><strong>Pai:</strong> {selectedClientDetail.fatherName}</p>}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Endereço Completo de Instalação Física */}
               <div className="space-y-2 border-t border-slate-150 pt-3 text-left">
-                <span className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-orange-500" /> Endereço de Entrega/Instalação
+                <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-orange-500" /> Endereço de Instalação Física (CTO)
                 </span>
-                <p className="font-extrabold text-slate-900">
-                  {selectedClientDetail.address}, Nº {selectedClientDetail.number}
-                </p>
-                <p className="text-slate-600">
-                  Bairro {selectedClientDetail.neighborhood} • CEP {selectedClientDetail.cep}
-                </p>
-                <p className="text-slate-500 text-xs">
-                  {selectedClientDetail.city}
-                </p>
-                {selectedClientDetail.addressReference && (
-                  <div className="bg-orange-500/5 border border-orange-500/10 p-2.5 rounded-lg mt-1 text-xs text-orange-850">
-                    <strong className="block text-orange-900 mb-0.5">Ponto de Referência:</strong>
-                    {selectedClientDetail.addressReference}
-                  </div>
-                )}
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/70 space-y-1 font-sans text-xs">
+                  <p className="font-black text-slate-900 text-sm">
+                    {selectedClientDetail.address}, Nº {selectedClientDetail.number}
+                  </p>
+                  <p className="text-slate-600">
+                    Bairro {selectedClientDetail.neighborhood} • CEP {selectedClientDetail.cep}
+                  </p>
+                  <p className="text-slate-500">
+                    {selectedClientDetail.city}
+                  </p>
+                  {selectedClientDetail.addressReference && (
+                    <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-lg mt-1 text-xs text-amber-900">
+                      <strong className="block text-amber-950 font-black mb-0.5">Ponto de Referência:</strong>
+                      {selectedClientDetail.addressReference}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Serviços Adicionais Opcionais */}
@@ -786,7 +769,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
 
               {/* Status */}
               <div className="border-t border-slate-150 pt-4 flex items-center justify-between">
-                <span className="text-xs text-slate-500">Mudar status rápido:</span>
+                <span className="text-xs text-slate-500 font-bold">Mudar status rápido:</span>
                 <div className="flex gap-1" id="quick-action-status">
                   {(['Ativo', 'Pendente', 'Bloqueado'] as ClientStatus[]).map(state => (
                     <button
@@ -795,9 +778,9 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                         onStatusChange(selectedClientDetail.id, state);
                         setSelectedClientDetail(prev => prev ? { ...prev, status: state } : null);
                       }}
-                      className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 text-[10px] font-black rounded-md border transition-all cursor-pointer ${
                         selectedClientDetail.status === state
-                          ? 'bg-gradient-to-r from-orange-500 via-orange-600 to-red-650 text-white border-orange-600'
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                       }`}
                     >
@@ -809,14 +792,53 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
 
             </div>
 
-            {/* Rodapé popup */}
-            <div className="bg-slate-50 p-4 border-t border-slate-150 flex justify-end">
-              <button
-                onClick={() => setSelectedClientDetail(null)}
-                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 text-white rounded-lg text-xs font-black cursor-pointer transition-colors uppercase tracking-wider"
-              >
-                Entendi, Fechar
-              </button>
+            {/* Rodapé popup com as Ações de Conferência */}
+            <div className="bg-slate-50 p-4 border-t border-slate-150 space-y-2.5">
+              
+              {/* Botão de Envio / Aprovação no IXC */}
+              {!selectedClientDetail.ixcId && onSyncIxc && (
+                <button
+                  type="button"
+                  onClick={() => handleSyncClick(selectedClientDetail)}
+                  disabled={syncingId === selectedClientDetail.id}
+                  className={`w-full py-3 rounded-xl text-white font-black text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 ${
+                    ixcLookupState.exists && ixcLookupState.ixcId
+                      ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25 ring-2 ring-blue-500/30'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25 ring-2 ring-emerald-500/30'
+                  }`}
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {syncingId === selectedClientDetail.id
+                    ? 'Processando no IXC...'
+                    : ixcLookupState.exists && ixcLookupState.ixcId
+                      ? `🔗 Vincular a este Cadastro Existente no IXC (#${ixcLookupState.ixcId})`
+                      : '🚀 Dados Conferidos! Aprovar e Cadastrar no IXC'}
+                </button>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clientToEdit = selectedClientDetail;
+                    setSelectedClientDetail(null);
+                    onEdit(clientToEdit);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Edit className="w-3.5 h-3.5 text-amber-600" />
+                  ✏️ Corrigir / Editar Dados
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedClientDetail(null)}
+                  className="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
+                >
+                  📁 Fechar Ficha
+                </button>
+              </div>
+
             </div>
 
           </div>

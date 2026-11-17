@@ -11,7 +11,7 @@ import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
 import { sendClientToIxc, checkClientInIxc } from './lib/ixcService';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
-import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus, RefreshCw } from 'lucide-react';
+import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus, RefreshCw, Edit } from 'lucide-react';
 
 export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -691,7 +691,7 @@ export default function App() {
                 <div className="text-right">
                   <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Preço / Vencimento</span>
                   <span className="text-sm font-black text-slate-900">
-                    R$ {PLANS.find(p => p.id === notificationClient.planId)?.price.toFixed(2)} • Dia {notificationClient.dueDate}
+                    R$ {PLANS.find(p => p.id === notificationClient.planId)?.price.toFixed(2).replace('.', ',')} • Dia {notificationClient.dueDate}
                   </span>
                 </div>
               </div>
@@ -704,20 +704,34 @@ export default function App() {
                   <p className="text-slate-700"><strong>CPF:</strong> <span className="font-bold text-slate-900">{notificationClient.cpf}</span></p>
                   <p className="text-slate-700"><strong>Telefone:</strong> <span className="font-bold text-slate-900">{notificationClient.phone}</span></p>
                   <p className="text-slate-700"><strong>E-mail:</strong> <span className="font-bold text-slate-900 text-xs block truncate" title={notificationClient.email}>{notificationClient.email}</span></p>
+                  {notificationClient.naturalidade && <p className="text-slate-700"><strong>Naturalidade:</strong> <span className="font-bold text-slate-900">{notificationClient.naturalidade}</span></p>}
                   {notificationClient.birthDate && <p className="text-slate-700"><strong>Nascimento:</strong> <span className="font-bold text-slate-900">{notificationClient.birthDate.split('-').reverse().join('/')}</span></p>}
+                  {(notificationClient.motherName || notificationClient.fatherName) && (
+                    <div className="sm:col-span-2 text-slate-800 text-xs bg-white p-3 rounded-xl border border-slate-200 mt-1">
+                      <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider block mb-1">Filiação</span>
+                      {notificationClient.motherName && <p><strong>Mãe:</strong> {notificationClient.motherName}</p>}
+                      {notificationClient.fatherName && <p className="mt-0.5"><strong>Pai:</strong> {notificationClient.fatherName}</p>}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Endereço de Instalação */}
               <div className="space-y-2 text-left">
                 <h5 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-orange-500" /> Endereço de Instalação Física
+                  <MapPin className="w-3.5 h-3.5 text-orange-500" /> Endereço de Instalação Física (CTO)
                 </h5>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 space-y-1.5 font-sans">
                   <p className="font-black text-slate-900">{notificationClient.address}, Nº {notificationClient.number}</p>
                   <p className="text-slate-600">Bairro: <span className="font-bold text-slate-800">{notificationClient.neighborhood}</span></p>
                   <p className="text-slate-600">CEP: <span className="font-bold text-slate-800">{notificationClient.cep}</span></p>
                   <p className="text-slate-500 text-xs">{notificationClient.city}</p>
+                  {notificationClient.addressReference && (
+                    <div className="bg-amber-50 border border-amber-200/80 p-2.5 rounded-lg mt-2 text-xs text-amber-900">
+                      <strong className="block text-amber-950 font-black mb-0.5">Ponto de Referência:</strong>
+                      {notificationClient.addressReference}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -786,18 +800,18 @@ export default function App() {
                   <button
                     disabled={isSyncingIxcId === notificationClient.id}
                     onClick={() => handleApproveAndSendToIxc(notificationClient)}
-                    className={`w-full py-2.5 rounded-xl text-white font-extrabold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 ${
+                    className={`w-full py-3 rounded-xl text-white font-black text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 ${
                       notifIxcLookup.exists 
-                        ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20' 
-                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                        ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25 ring-2 ring-blue-500/30' 
+                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25 ring-2 ring-emerald-500/30'
                     }`}
                   >
                     <Check className="w-4 h-4 stroke-[3]" />
                     {isSyncingIxcId === notificationClient.id 
                       ? 'Processando no IXC...' 
                       : notifIxcLookup.exists && notifIxcLookup.ixcId
-                        ? `Vincular a este Cadastro Existente no IXC (#${notifIxcLookup.ixcId})`
-                        : 'Dados Conferidos! Cadastrar Novo no IXC'}
+                        ? `🔗 Vincular a este Cadastro Existente no IXC (#${notifIxcLookup.ixcId})`
+                        : '🚀 Dados Conferidos! Aprovar e Cadastrar no IXC'}
                   </button>
                 )}
 
@@ -808,9 +822,10 @@ export default function App() {
                       setNotificationClient(null);
                       handleStartEdit(clientToEdit);
                     }}
-                    className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    Corrigir / Editar Dados
+                    <Edit className="w-3.5 h-3.5 text-amber-600" />
+                    ✏️ Corrigir / Editar Dados
                   </button>
 
                   <button
@@ -818,9 +833,9 @@ export default function App() {
                       handleDismissNotification(notificationClient.id);
                       setNotificationClient(null);
                     }}
-                    className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                    className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
                   >
-                    Marcar Como Lido
+                    📁 Marcar Como Lido
                   </button>
                 </div>
               </div>
