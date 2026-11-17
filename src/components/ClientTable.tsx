@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Client, PlanId, DueDate, ClientStatus, PLANS, DUE_DATES } from '../types';
 import { Search, Eye, Filter, Edit, Trash2, Calendar, HardDrive, MapPin, CheckCircle, Clock, AlertTriangle, CloudDownload, RefreshCw } from 'lucide-react';
+import { checkClientInIxc } from '../lib/ixcService';
 
 interface ClientTableProps {
   clients: Client[];
@@ -19,6 +20,53 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
   const [customMonth, setCustomMonth] = useState<string>('');
   const [selectedClientDetail, setSelectedClientDetail] = useState<Client | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [ixcLookupState, setIxcLookupState] = useState<{
+    loading: boolean;
+    exists?: boolean;
+    ixcId?: string;
+    razao?: string;
+  }>({ loading: false });
+
+  // Mantém a modal sincronizada quando o cliente receber o ixcId em tempo real
+  useEffect(() => {
+    if (selectedClientDetail) {
+      const updated = clients.find(c => c.id === selectedClientDetail.id);
+      if (updated && (updated.ixcId !== selectedClientDetail.ixcId || updated.status !== selectedClientDetail.status)) {
+        setSelectedClientDetail(updated);
+      }
+    }
+  }, [clients, selectedClientDetail]);
+
+  // Consulta proativa no IXC ao abrir a ficha do cliente para checar se o CPF já existe
+  useEffect(() => {
+    if (selectedClientDetail && !selectedClientDetail.ixcId && selectedClientDetail.cpf) {
+      let isMounted = true;
+      setIxcLookupState({ loading: true });
+      checkClientInIxc(selectedClientDetail.cpf)
+        .then(res => {
+          if (isMounted) {
+            if (res.success && res.exists && res.ixcId) {
+              setIxcLookupState({
+                loading: false,
+                exists: true,
+                ixcId: res.ixcId,
+                razao: res.razao
+              });
+            } else {
+              setIxcLookupState({ loading: false, exists: false });
+            }
+          }
+        })
+        .catch(() => {
+          if (isMounted) setIxcLookupState({ loading: false });
+        });
+      return () => {
+        isMounted = false;
+      };
+    } else {
+      setIxcLookupState({ loading: false });
+    }
+  }, [selectedClientDetail?.id, selectedClientDetail?.ixcId, selectedClientDetail?.cpf]);
 
   const handleSyncClick = async (client: Client) => {
     if (!onSyncIxc) return;
@@ -595,32 +643,63 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
               </div>
 
               {/* Informações IXC Soft */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-left">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Sistema IXC Soft</span>
-                    {selectedClientDetail.ixcId ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-700 mt-0.5">
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> ID #{selectedClientDetail.ixcId} (Sincronizado)
-                      </span>
-                    ) : (
-                      <span className="text-xs text-amber-700 font-bold block mt-0.5">
-                        {selectedClientDetail.ixcStatus || 'Não enviado ao IXC'}
-                      </span>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left">
+                <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block">Sistema IXC Soft</span>
+                {selectedClientDetail.ixcId ? (
+                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 mt-1">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    <span>Cadastrado no IXC Soft • ID #{selectedClientDetail.ixcId} (Sincronizado)</span>
+                  </div>
+                ) : ixcLookupState.loading ? (
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-600" />
+                    <span>Consultando se este CPF já existe no IXC...</span>
+                  </div>
+                ) : ixcLookupState.exists && ixcLookupState.ixcId ? (
+                  <div className="mt-1.5 p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-left">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <span className="font-black text-amber-900 block">
+                          Cliente Já Cadastrado no IXC Soft!
+                        </span>
+                        <span className="text-amber-800 text-[11px] block mt-0.5">
+                          Encontrado como <strong>{ixcLookupState.razao}</strong> (ID #{ixcLookupState.ixcId}).
+                        </span>
+                      </div>
+                    </div>
+                    {onSyncIxc && (
+                      <button
+                        type="button"
+                        onClick={() => handleSyncClick(selectedClientDetail)}
+                        disabled={syncingId === selectedClientDetail.id}
+                        className="mt-2.5 w-full py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {syncingId === selectedClientDetail.id ? 'Vinculando...' : `Vincular a este Cadastro IXC (#${ixcLookupState.ixcId})`}
+                      </button>
                     )}
                   </div>
-                  {!selectedClientDetail.ixcId && onSyncIxc && (
-                    <button
-                      type="button"
-                      onClick={() => handleSyncClick(selectedClientDetail)}
-                      disabled={syncingId === selectedClientDetail.id}
-                      className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
-                    >
-                      <RefreshCw className={`w-3 h-3 ${syncingId === selectedClientDetail.id ? 'animate-spin' : ''}`} />
-                      {syncingId === selectedClientDetail.id ? 'Enviando...' : 'Enviar ao IXC'}
-                    </button>
-                  )}
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between mt-1">
+                    <div>
+                      <span className="text-xs text-slate-600 font-bold block">
+                        Novo Cliente (Não consta no IXC)
+                      </span>
+                    </div>
+                    {onSyncIxc && (
+                      <button
+                        type="button"
+                        onClick={() => handleSyncClick(selectedClientDetail)}
+                        disabled={syncingId === selectedClientDetail.id}
+                        className="px-3 py-1.5 text-xs font-black rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${syncingId === selectedClientDetail.id ? 'animate-spin' : ''}`} />
+                        {syncingId === selectedClientDetail.id ? 'Enviando...' : 'Cadastrar Novo no IXC'}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Contato rápida */}

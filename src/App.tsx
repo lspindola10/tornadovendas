@@ -9,9 +9,9 @@ import PendingApproval from './components/PendingApproval';
 import UserManagement from './components/UserManagement';
 import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
-import { sendClientToIxc } from './lib/ixcService';
+import { sendClientToIxc, checkClientInIxc } from './lib/ixcService';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
-import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus } from 'lucide-react';
+import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus, RefreshCw } from 'lucide-react';
 
 export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -23,6 +23,12 @@ export default function App() {
   const [isSharedPortal, setIsSharedPortal] = useState(false);
   const [notificationClient, setNotificationClient] = useState<Client | null>(null);
   const [isSyncingIxcId, setIsSyncingIxcId] = useState<string | null>(null);
+  const [notifIxcLookup, setNotifIxcLookup] = useState<{
+    loading: boolean;
+    exists?: boolean;
+    ixcId?: string;
+    razao?: string;
+  }>({ loading: false });
   const [copiedLink, setCopiedLink] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   
@@ -137,6 +143,37 @@ export default function App() {
     };
   }, [currentUser]);
 
+  // Consulta automática no IXC se o cliente da notificação já possui cadastro no ERP
+  useEffect(() => {
+    if (notificationClient && !notificationClient.ixcId && notificationClient.cpf) {
+      let active = true;
+      setNotifIxcLookup({ loading: true });
+      checkClientInIxc(notificationClient.cpf)
+        .then(res => {
+          if (active) {
+            if (res.success && res.exists && res.ixcId) {
+              setNotifIxcLookup({
+                loading: false,
+                exists: true,
+                ixcId: res.ixcId,
+                razao: res.razao
+              });
+            } else {
+              setNotifIxcLookup({ loading: false, exists: false });
+            }
+          }
+        })
+        .catch(() => {
+          if (active) setNotifIxcLookup({ loading: false });
+        });
+      return () => {
+        active = false;
+      };
+    } else {
+      setNotifIxcLookup({ loading: false });
+    }
+  }, [notificationClient?.id, notificationClient?.ixcId, notificationClient?.cpf]);
+
   // Salvar cliente (Criar ou Atualizar)
   const handleSaveClient = async (savedClient: Client) => {
     try {
@@ -180,7 +217,11 @@ export default function App() {
           isNewNotification: false
         });
         setNotificationClient(null);
-        triggerToast(`🎉 Concluído! Cliente "${client.name}" cadastrado no IXC Soft com o ID #${result.ixcId}!`, 'success');
+        if (result.alreadyExists) {
+          triggerToast(`⚠️ "${client.name}" já constava no IXC (ID #${result.ixcId}). Cadastro vinculado com sucesso sem duplicar!`, 'info');
+        } else {
+          triggerToast(`🎉 Concluído! Cliente "${client.name}" cadastrado no IXC Soft com o ID #${result.ixcId}!`, 'success');
+        }
       } else {
         triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
       }
@@ -194,7 +235,7 @@ export default function App() {
   // Sincronizar cliente específico com o IXC Soft
   const handleSyncClientToIxc = async (client: Client) => {
     try {
-      triggerToast(`Enviando "${client.name}" para o IXC Soft...`, 'info');
+      triggerToast(`Conferindo e enviando "${client.name}" para o IXC Soft...`, 'info');
       const result = await sendClientToIxc(client);
       if (result.success && result.ixcId) {
         const docRef = doc(db, 'clients', client.id);
@@ -202,7 +243,11 @@ export default function App() {
           ixcId: result.ixcId,
           ixcStatus: 'Sincronizado'
         });
-        triggerToast(`Cliente cadastrado no IXC com sucesso! Código: #${result.ixcId}`, 'success');
+        if (result.alreadyExists) {
+          triggerToast(`⚠️ "${client.name}" já constava no IXC (ID #${result.ixcId}). Cadastro vinculado com sucesso sem duplicar!`, 'info');
+        } else {
+          triggerToast(`Cliente cadastrado no IXC com sucesso! Código: #${result.ixcId}`, 'success');
+        }
       } else {
         triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
       }
@@ -686,11 +731,30 @@ export default function App() {
                 {notificationClient.ixcId ? (
                   <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 mt-1">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Cadastrado no IXC Soft • ID #{notificationClient.ixcId}</span>
+                    <span>Cadastrado no IXC Soft • ID #{notificationClient.ixcId} (Sincronizado)</span>
+                  </div>
+                ) : notifIxcLookup.loading ? (
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-600" />
+                    <span>Consultando se este CPF já existe no IXC...</span>
+                  </div>
+                ) : notifIxcLookup.exists && notifIxcLookup.ixcId ? (
+                  <div className="mt-1.5 p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-left">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <span className="font-black text-amber-900 block">
+                          Cliente Já Cadastrado no IXC Soft!
+                        </span>
+                        <span className="text-amber-800 text-[11px] block mt-0.5">
+                          Encontrado no IXC com o <strong>ID #{notifIxcLookup.ixcId}</strong> ({notifIxcLookup.razao}).
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-amber-700 font-bold mt-1">
-                    {notificationClient.ixcStatus || 'Aguardando conferência prévia do funcionário'}
+                  <p className="text-xs text-slate-600 font-bold mt-1">
+                    Novo Cliente (Não consta cadastro prévio no IXC)
                   </p>
                 )}
               </div>
@@ -704,10 +768,18 @@ export default function App() {
                   <button
                     disabled={isSyncingIxcId === notificationClient.id}
                     onClick={() => handleApproveAndSendToIxc(notificationClient)}
-                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+                    className={`w-full py-2.5 rounded-xl text-white font-extrabold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 ${
+                      notifIxcLookup.exists 
+                        ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20' 
+                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                    }`}
                   >
                     <Check className="w-4 h-4 stroke-[3]" />
-                    {isSyncingIxcId === notificationClient.id ? 'Cadastrando no IXC Soft...' : 'Dados Conferidos! Aprovar e Cadastrar no IXC'}
+                    {isSyncingIxcId === notificationClient.id 
+                      ? 'Processando no IXC...' 
+                      : notifIxcLookup.exists && notifIxcLookup.ixcId
+                        ? `Vincular a este Cadastro Existente no IXC (#${notifIxcLookup.ixcId})`
+                        : 'Dados Conferidos! Cadastrar Novo no IXC'}
                   </button>
                 )}
 
