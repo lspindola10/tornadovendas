@@ -9,6 +9,7 @@ import PendingApproval from './components/PendingApproval';
 import UserManagement from './components/UserManagement';
 import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
+import { sendClientToIxc } from './lib/ixcService';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
 import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus } from 'lucide-react';
 
@@ -21,6 +22,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'customer' | 'admin' | 'users'>('admin'); // Padrão é admin para funcionários logados
   const [isSharedPortal, setIsSharedPortal] = useState(false);
   const [notificationClient, setNotificationClient] = useState<Client | null>(null);
+  const [isSyncingIxcId, setIsSyncingIxcId] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   
@@ -143,6 +145,9 @@ export default function App() {
       const clientToSave = { ...savedClient };
       if (!exists && !clientToSave.selfRegistered) {
         clientToSave.registeredBy = appUser?.name || 'Admin';
+        if (!clientToSave.ixcId) {
+          clientToSave.ixcStatus = 'Aguardando envio ao IXC';
+        }
       }
 
       const docRef = doc(db, 'clients', clientToSave.id);
@@ -158,6 +163,52 @@ export default function App() {
     }
     setEditingClient(null);
     setIsFormModalOpen(false);
+  };
+
+  // Aprovar e enviar para o IXC dentro da modal de conferência da ficha
+  const handleApproveAndSendToIxc = async (client: Client) => {
+    setIsSyncingIxcId(client.id);
+    try {
+      triggerToast(`Conferindo e cadastrando "${client.name}" no IXC Soft...`, 'info');
+      const result = await sendClientToIxc(client);
+      if (result.success && result.ixcId) {
+        const docRef = doc(db, 'clients', client.id);
+        await updateDoc(docRef, {
+          ixcId: result.ixcId,
+          ixcStatus: 'Sincronizado',
+          status: 'Ativo',
+          isNewNotification: false
+        });
+        setNotificationClient(null);
+        triggerToast(`🎉 Concluído! Cliente "${client.name}" cadastrado no IXC Soft com o ID #${result.ixcId}!`, 'success');
+      } else {
+        triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
+      }
+    } catch (err: any) {
+      triggerToast(`Erro de conexão com IXC: ${err?.message || 'Falha desconhecida'}`, 'danger');
+    } finally {
+      setIsSyncingIxcId(null);
+    }
+  };
+
+  // Sincronizar cliente específico com o IXC Soft
+  const handleSyncClientToIxc = async (client: Client) => {
+    try {
+      triggerToast(`Enviando "${client.name}" para o IXC Soft...`, 'info');
+      const result = await sendClientToIxc(client);
+      if (result.success && result.ixcId) {
+        const docRef = doc(db, 'clients', client.id);
+        await updateDoc(docRef, {
+          ixcId: result.ixcId,
+          ixcStatus: 'Sincronizado'
+        });
+        triggerToast(`Cliente cadastrado no IXC com sucesso! Código: #${result.ixcId}`, 'success');
+      } else {
+        triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
+      }
+    } catch (err: any) {
+      triggerToast(`Erro de conexão com IXC: ${err?.message || 'Falha desconhecida'}`, 'danger');
+    }
   };
 
   // Callback de sucesso vindo do portal público do próprio cliente (Autocadastro)
@@ -522,6 +573,7 @@ export default function App() {
                   onEdit={handleStartEdit} 
                   onDelete={handleDeleteClient} 
                   onStatusChange={handleStatusChange} 
+                  onSyncIxc={handleSyncClientToIxc}
                 />
               </div>
 
@@ -628,22 +680,49 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Ações de Gestão */}
+              {/* Status no Sistema IXC Soft */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left">
+                <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block">Status no Sistema IXC Soft</span>
+                {notificationClient.ixcId ? (
+                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 mt-1">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Cadastrado no IXC Soft • ID #{notificationClient.ixcId}</span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-amber-700 font-bold mt-1">
+                    {notificationClient.ixcStatus || 'Aguardando conferência prévia do funcionário'}
+                  </p>
+                )}
+              </div>
+
+              {/* Ações de Gestão e Conferência */}
               <div className="border-t border-slate-150 pt-4 space-y-2.5">
-                <span className="text-xs font-bold text-slate-500 block text-left">Ações Rápidas do Administrador:</span>
+                <span className="text-xs font-bold text-slate-700 block text-left">Ações de Conferência:</span>
+                
+                {/* Botão de Envio para o IXC APÓS CONFERIR */}
+                {!notificationClient.ixcId && (
+                  <button
+                    disabled={isSyncingIxcId === notificationClient.id}
+                    onClick={() => handleApproveAndSendToIxc(notificationClient)}
+                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    {isSyncingIxcId === notificationClient.id ? 'Cadastrando no IXC Soft...' : 'Dados Conferidos! Aprovar e Cadastrar no IXC'}
+                  </button>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-2 font-sans">
                   <button
                     onClick={() => {
-                      handleStatusChange(notificationClient.id, 'Ativo');
-                      handleDismissNotification(notificationClient.id);
+                      const clientToEdit = notificationClient;
                       setNotificationClient(null);
-                      triggerToast(`Cliente ${notificationClient.name} ativado comercialmente!`, 'success');
+                      handleStartEdit(clientToEdit);
                     }}
-                    className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-750 text-white font-extrabold text-xs cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/10 transition-all"
+                    className="flex-1 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-extrabold text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    <Check className="w-4 h-4" />
-                    Ativar Contrato / Sinal Ativo
+                    Corrigir / Editar Dados
                   </button>
+
                   <button
                     onClick={() => {
                       handleDismissNotification(notificationClient.id);
@@ -651,7 +730,7 @@ export default function App() {
                     }}
                     className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
                   >
-                    Marcar Como Lido / Pendente
+                    Marcar Como Lido
                   </button>
                 </div>
               </div>

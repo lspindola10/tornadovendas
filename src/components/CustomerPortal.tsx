@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client, PlanId, DueDate, ClientStatus, PLANS, DUE_DATES } from '../types';
 import { isValidCPF } from '../lib/cpfValidator';
+import { sendClientToIxc } from '../lib/ixcService';
 import { 
   Wifi, Phone, User, Mail, ShieldCheck, MapPin, 
   CreditCard, Calendar, Check, ChevronRight, ChevronLeft, 
@@ -261,7 +262,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
       address,
       number,
       neighborhood,
-      city: city || 'São Paulo - SP',
+      city: city || 'Santa Quitéria do Maranhão - MA',
       planId: selectedPlanId,
       dueDate,
       status: 'Pendente', // Novo cadastro do próprio cliente entra como instalação agendada (Pendente)
@@ -273,7 +274,8 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
       birthDate,
       fatherName,
       motherName,
-      addressReference
+      addressReference,
+      ixcStatus: 'Aguardando Conferência'
     };
 
     try {
@@ -1020,7 +1022,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                 Parabéns {registeredClient.name}!
               </h2>
               <p className="text-xs text-slate-500 max-w-lg mx-auto">
-                Seu cadastro de banda larga de fibra foi homologado com o ID interno <strong className="font-mono text-slate-700">{registeredClient.id}</strong>. Nosso técnico entrará em contato via WhatsApp para confirmar o horário de instalação física.
+                Sua solicitação de assinatura de banda larga foi recebida com sucesso! Código do pedido: <strong className="font-mono text-slate-700">{registeredClient.id}</strong>. Nossa equipe técnica irá conferir a viabilidade e entrará em contato via WhatsApp para confirmar o agendamento da instalação.
               </p>
             </div>
 

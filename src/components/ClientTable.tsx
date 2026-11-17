@@ -7,9 +7,10 @@ interface ClientTableProps {
   onEdit: (client: Client) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, state: ClientStatus) => void;
+  onSyncIxc?: (client: Client) => Promise<void>;
 }
 
-export default function ClientTable({ clients, onEdit, onDelete, onStatusChange }: ClientTableProps) {
+export default function ClientTable({ clients, onEdit, onDelete, onStatusChange, onSyncIxc }: ClientTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlan, setFilterPlan] = useState<string>('todos');
   const [filterDueDate, setFilterDueDate] = useState<string>('todos');
@@ -17,6 +18,17 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
   const [filterPeriod, setFilterPeriod] = useState<string>('todos');
   const [customMonth, setCustomMonth] = useState<string>('');
   const [selectedClientDetail, setSelectedClientDetail] = useState<Client | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+
+  const handleSyncClick = async (client: Client) => {
+    if (!onSyncIxc) return;
+    setSyncingId(client.id);
+    try {
+      await onSyncIxc(client);
+    } finally {
+      setSyncingId(null);
+    }
+  };
 
   // Filtragem dos dados
   const filteredClients = clients.filter(client => {
@@ -343,6 +355,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                 <th className="py-3 px-4 w-full">Nome & Contato</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Data do Cadastro</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Origem</th>
+                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">IXC Soft</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Plano Ativo</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Mensalidade</th>
                 <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Vencimento</th>
@@ -398,6 +411,34 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                           <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
                             Usuário: {client.registeredBy || 'Sistema'}
                           </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* IXC Soft Status */}
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                      <div className="inline-flex flex-col items-center justify-center">
+                        {client.ixcId ? (
+                          <span 
+                            className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                            title={`Cadastrado no IXC Soft com ID: ${client.ixcId}`}
+                          >
+                            <CheckCircle className="w-2.5 h-2.5 text-emerald-600" />
+                            #{client.ixcId}
+                          </span>
+                        ) : onSyncIxc ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSyncClick(client)}
+                            disabled={syncingId === client.id}
+                            className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer disabled:opacity-50"
+                            title={client.ixcStatus || "Clique para enviar este cadastro ao IXC Soft"}
+                          >
+                            <RefreshCw className={`w-2.5 h-2.5 text-amber-600 ${syncingId === client.id ? 'animate-spin' : ''}`} />
+                            {syncingId === client.id ? 'Enviando...' : 'Enviar IXC'}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-slate-400">Pendente</span>
                         )}
                       </div>
                     </td>
@@ -550,6 +591,35 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange 
                 <div className="text-right">
                   <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Vencimento</span>
                   <span className="text-sm font-black text-slate-950">Dia {selectedClientDetail.dueDate}</span>
+                </div>
+              </div>
+
+              {/* Informações IXC Soft */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-left">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Sistema IXC Soft</span>
+                    {selectedClientDetail.ixcId ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-700 mt-0.5">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> ID #{selectedClientDetail.ixcId} (Sincronizado)
+                      </span>
+                    ) : (
+                      <span className="text-xs text-amber-700 font-bold block mt-0.5">
+                        {selectedClientDetail.ixcStatus || 'Não enviado ao IXC'}
+                      </span>
+                    )}
+                  </div>
+                  {!selectedClientDetail.ixcId && onSyncIxc && (
+                    <button
+                      type="button"
+                      onClick={() => handleSyncClick(selectedClientDetail)}
+                      disabled={syncingId === selectedClientDetail.id}
+                      className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${syncingId === selectedClientDetail.id ? 'animate-spin' : ''}`} />
+                      {syncingId === selectedClientDetail.id ? 'Enviando...' : 'Enviar ao IXC'}
+                    </button>
+                  )}
                 </div>
               </div>
 

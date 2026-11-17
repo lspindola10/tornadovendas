@@ -1,8 +1,26 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Regras para a base de clientes
     match /clients/{clientId} {
-      allow read, write: if true;
+      // Qualquer pessoa na internet pode CRIAR um cadastro novo pelo link de autoatendimento
+      allow create: if true;
+      
+      // Mas APENAS usuários logados no ERP (com senha) podem LER, EDITAR ou DELETAR os clientes
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    // Regras para gestão da equipe de funcionários
+    match /users/{userId} {
+      // LEITURA: O funcionário só pode ler a própria ficha (para saber se foi aprovado). Você pode ler todas.
+      allow read: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == 'leo.alves.spindola@gmail.com');
+      
+      // CRIAÇÃO: O funcionário só pode criar a própria ficha ao se cadastrar
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // GERENCIAMENTO (Edição e Exclusão): APENAS VOCÊ pode aprovar, bloquear ou deletar funcionários
+      allow update, delete: if request.auth != null && request.auth.token.email == 'leo.alves.spindola@gmail.com';
     }
   }
 }
