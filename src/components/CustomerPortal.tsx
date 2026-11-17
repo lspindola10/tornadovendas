@@ -16,6 +16,56 @@ interface CustomerPortalProps {
 }
 
 export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProps) {
+  const getPlanMicroFeatures = (planId: PlanId) => {
+    switch (planId) {
+      case '100M':
+        return [
+          { icon: '📱', text: '3 a 5 dispositivos conectados' },
+          { icon: '🌐', text: 'Redes sociais, WhatsApp e vídeos HD' },
+          { icon: '📶', text: 'Wi-Fi de Alta Performance incluso' }
+        ];
+      case '300M':
+        return [
+          { icon: '📺', text: 'Streaming e Filmes 4K sem travar' },
+          { icon: '💻', text: 'Home Office e videochamadas fluídas' },
+          { icon: '📶', text: 'Roteador Dual-Band 5GHz incluso' }
+        ];
+      case '500M':
+        return [
+          { icon: '🎮', text: 'Gamers: Zero Lag (Ping Ultrabaixo)' },
+          { icon: '📺', text: 'Múltiplas TVs 4K reproduzindo juntas' },
+          { icon: '⚡', text: 'Downloads pesados em segundos' }
+        ];
+      case '600M':
+        return [
+          { icon: '👨‍👩‍👧‍👦', text: 'Famílias grandes com múltiplos aparelhos' },
+          { icon: '☁️', text: 'Upload veloz para nuvem e lives' },
+          { icon: '📶', text: 'Super cobertura para toda a residência' }
+        ];
+      case '1G':
+        return [
+          { icon: '⚡', text: 'Velocidade máxima Gigabit sem limites' },
+          { icon: '🏢', text: 'Profissionais exigentes e criadores' },
+          { icon: '👑', text: 'Equipamento e suporte prioritário VIP' }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getPlanBadge = (planId: PlanId) => {
+    switch (planId) {
+      case '300M':
+        return { text: '🔥 MAIS ESCOLHIDO', color: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs' };
+      case '500M':
+        return { text: '⭐ CUSTO-BENEFÍCIO', color: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs' };
+      case '1G':
+        return { text: '👑 VELOCIDADE EXTREMA', color: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs' };
+      default:
+        return null;
+    }
+  };
+
   const getPlanEmblemData = (planId: PlanId) => {
     switch (planId) {
       case '100M':
@@ -327,49 +377,51 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
 
       {/* Barra de Progresso Interativa (Wizard Step) */}
       {step < 5 && (
-        <div className="mb-6 bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs" id="wizard-progress-bar">
+        <div className="mb-6 bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 shadow-xs" id="wizard-progress-bar">
           <div className="flex items-center justify-between">
             {[
-              { id: 1, label: 'Plano' },
-              { id: 2, label: 'Endereço' },
-              { id: 3, label: 'Seus Dados' },
-              { id: 4, label: 'Faturamento' }
-            ].map((s) => (
-              <React.Fragment key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Permite retroceder livremente ou avançar se já preencheu passos anteriores
-                    if (s.id < step) {
-                      setStep(s.id);
-                    } else if (s.id > step && validateStep(step)) {
-                      setStep(s.id);
-                    }
-                  }}
-                  className="flex items-center gap-2 group focus:outline-hidden"
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    step === s.id 
-                      ? 'bg-slate-900 text-white ring-4 ring-indigo-500/10' 
-                      : step > s.id 
-                      ? 'bg-emerald-500 text-white' 
-                      : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
-                  }`}>
-                    {step > s.id ? <Check className="w-4 h-4 stroke-[3]" /> : s.id}
-                  </div>
-                  <span className={`text-xs font-bold hidden sm:inline ${
-                    step === s.id ? 'text-slate-900' : 'text-slate-400'
-                  }`}>
-                    {s.label}
-                  </span>
-                </button>
-                {s.id < 4 && (
-                  <div className={`flex-1 h-0.5 mx-2 sm:mx-4 ${
-                    step > s.id ? 'bg-emerald-500' : 'bg-slate-100'
-                  }`}></div>
-                )}
-              </React.Fragment>
-            ))}
+              { id: 1, label: '1. Escolha o Plano', icon: Wifi },
+              { id: 2, label: '2. Endereço', icon: MapPin },
+              { id: 3, label: '3. Seus Dados', icon: User },
+              { id: 4, label: '4. Faturamento', icon: CreditCard }
+            ].map((s) => {
+              const IconComp = s.icon;
+              return (
+                <React.Fragment key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (s.id < step) {
+                        setStep(s.id);
+                      } else if (s.id > step && validateStep(step)) {
+                        setStep(s.id);
+                      }
+                    }}
+                    className="flex items-center gap-2 group focus:outline-hidden cursor-pointer"
+                  >
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs font-black transition-all ${
+                      step === s.id 
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105' 
+                        : step > s.id 
+                        ? 'bg-emerald-500 text-white shadow-xs' 
+                        : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
+                    }`}>
+                      {step > s.id ? <Check className="w-4 h-4 stroke-[3]" /> : <IconComp className="w-4 h-4" />}
+                    </div>
+                    <span className={`text-xs font-black hidden md:inline transition-colors ${
+                      step === s.id ? 'text-blue-600' : step > s.id ? 'text-slate-800' : 'text-slate-400'
+                    }`}>
+                      {s.label}
+                    </span>
+                  </button>
+                  {s.id < 4 && (
+                    <div className={`flex-1 h-1 mx-2 sm:mx-3 rounded-full transition-all ${
+                      step > s.id ? 'bg-emerald-500' : 'bg-slate-100'
+                    }`}></div>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       )}
@@ -397,10 +449,9 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
               {PLANS.map((plan) => {
                 const isSelected = selectedPlanId === plan.id;
                 const emblem = getPlanEmblemData(plan.id);
-                
-                // Destaques e badges específicos para clientes de autoatendimento
-                const isPromo = plan.id === '500M' || plan.id === '1G';
-                const promoLabel = plan.id === '500M' ? 'Custo-Benefício ★' : plan.id === '1G' ? 'Velocidade Extrema' : '';
+                const badge = getPlanBadge(plan.id);
+                const microFeatures = getPlanMicroFeatures(plan.id);
+                const [reais, centavos] = plan.price.toFixed(2).split('.');
 
                 return (
                   <div
@@ -408,25 +459,27 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                     onClick={() => setSelectedPlanId(plan.id)}
                     className={`rounded-2xl border-2 transition-all p-4 flex flex-col justify-between cursor-pointer relative select-none ${
                       isSelected 
-                        ? 'border-indigo-600 bg-linear-to-b from-indigo-50/40 to-white ring-4 ring-indigo-600/20 scale-[1.04] shadow-xl z-10' 
-                        : 'border-slate-300 bg-white hover:border-slate-400 hover:shadow-xs'
+                        ? 'border-blue-600 bg-linear-to-b from-blue-50/60 via-white to-white ring-4 ring-blue-500/20 scale-[1.03] shadow-xl z-10' 
+                        : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5'
                     }`}
                   >
-                    {isPromo && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-linear-to-r from-indigo-600 to-cyan-500 text-white text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase shadow-xs whitespace-nowrap">
-                        {promoLabel}
+                    {badge && (
+                      <span className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[9.5px] px-2.5 py-0.5 rounded-full font-black tracking-wide uppercase whitespace-nowrap z-20 ${badge.color}`}>
+                        {badge.text}
                       </span>
                     )}
 
-                    <div className="space-y-3 mt-1">
+                    <div className="space-y-3 mt-1.5">
                       <div className="flex items-center justify-between">
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${plan.badgeBg}`}>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${plan.badgeBg}`}>
                           {plan.id}
                         </span>
-                        {isSelected && (
-                          <span className="p-0.5 bg-indigo-600 text-white rounded-full">
-                            <Check className="w-3 h-3 stroke-[2.5]" />
+                        {isSelected ? (
+                          <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xs">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
                           </span>
+                        ) : (
+                          <span className="w-4 h-4 rounded-full border-2 border-slate-300"></span>
                         )}
                       </div>
 
@@ -448,7 +501,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                       )}
 
                       <div>
-                        <h3 className="font-sans font-black text-xl text-slate-950">
+                        <h3 className="font-sans font-black text-2xl text-slate-900 tracking-tight">
                           {plan.speed}
                         </h3>
                         <p className="text-[10px] uppercase font-bold text-slate-400 font-mono tracking-tight">
@@ -456,41 +509,51 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                         </p>
                       </div>
 
-                      <p className="text-[11px] text-blue-600 font-bold font-sans leading-tight min-h-[44px]">
-                        {plan.description}
-                      </p>
+                      {/* Micro-descrições visuais de uso prático */}
+                      <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                        <p className="text-[9.5px] font-black uppercase tracking-wider text-slate-400">Ideal para:</p>
+                        {microFeatures.map((feat, idx) => (
+                          <div key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-600 leading-snug">
+                            <span className="shrink-0 text-xs">{feat.icon}</span>
+                            <span className="font-medium text-slate-700">{feat.text}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="border-t border-slate-100 pt-3 mt-4 space-y-3">
+                    <div className="border-t border-slate-150 pt-3 mt-4 space-y-3">
                       <div>
-                        <p className="text-2xl font-black text-slate-900 tracking-tight">
-                          R$ {plan.price.toFixed(2)}
-                          <span className="text-[10px] text-slate-400 font-light block mt-0.5">/mensal</span>
-                        </p>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Assinatura Mensal</span>
+                        <div className="flex items-baseline gap-0.5 mt-0.5">
+                          <span className="text-xs font-black text-slate-500">R$</span>
+                          <span className="text-3xl font-black text-slate-950 tracking-tight leading-none">{reais}</span>
+                          <span className="text-sm font-black text-slate-600">,{centavos}</span>
+                          <span className="text-[11px] font-bold text-slate-400 ml-1">/mês</span>
+                        </div>
                       </div>
 
                       <button
                         type="button"
-                        className={`w-full py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        className={`w-full py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                           isSelected 
-                            ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700' 
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-600/50' 
                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }`}
                       >
-                        {isSelected ? 'PLANO SELECIONADO' : 'Quero Este'}
+                        {isSelected ? '✓ PLANO SELECIONADO' : 'Quero Este'}
                       </button>
                       
                       {isSelected && (
                         <button
                           type="button"
                           onClick={(e) => {
-                            e.stopPropagation(); // Evita re-selecionar o plano
+                            e.stopPropagation();
                             handleNextStep();
                           }}
-                          className="w-full sm:hidden flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-2 rounded-lg cursor-pointer shadow-md transition-all animate-heartbeat"
+                          className="w-full sm:hidden flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs py-2.5 rounded-xl cursor-pointer shadow-md transition-all animate-heartbeat"
                         >
                           Continuar Cadastro
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-4 h-4 stroke-[3]" />
                         </button>
                       )}
                     </div>
@@ -500,25 +563,28 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
             </div>
 
             {/* Sumário do Plano ativo atualmente no rodapé */}
-            <div className="hidden sm:flex flex-col sm:flex-row items-center justify-between bg-slate-50 rounded-2xl p-4 border border-slate-100 gap-3">
+            <div className="hidden sm:flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 rounded-2xl p-4 border border-blue-200/60 shadow-xs gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                  <Wifi className="w-5 h-5" />
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/25">
+                  <Wifi className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Você selecionou</p>
-                  <p className="text-sm font-bold text-slate-900">
-                    O plano {selectedPlanObj.name} de {selectedPlanObj.speed} por apenas R$ {selectedPlanObj.price.toFixed(2)}/mês!
+                  <p className="text-[10px] text-blue-600 uppercase font-black tracking-wider">Você selecionou</p>
+                  <p className="text-sm font-black text-slate-900">
+                    {selectedPlanObj.name} ({selectedPlanObj.speed}) por apenas{' '}
+                    <span className="text-blue-700 font-black">
+                      R$ {selectedPlanObj.price.toFixed(2).replace('.', ',')}/mês
+                    </span>
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500/20 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-md transition-all animate-heartbeat"
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/20 text-white font-black text-xs px-6 py-3 rounded-xl cursor-pointer shadow-md shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95"
               >
                 Prosseguir Cadastro
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 stroke-[3]" />
               </button>
             </div>
           </div>
@@ -948,7 +1014,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block text-[9.5px] uppercase tracking-wider mb-1">Pagamento Mensal</span>
-                  <span className="font-black text-emerald-600 text-base">R$ {selectedPlanObj.price.toFixed(2)}</span>
+                  <span className="font-black text-emerald-600 text-base">R$ {selectedPlanObj.price.toFixed(2).replace('.', ',')}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold block text-[9.5px] uppercase tracking-wider mb-1">Dia do Vencimento</span>
@@ -1039,7 +1105,7 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Mensalidade:</span>
-                  <strong className="text-slate-900">R$ {selectedPlanObj.price.toFixed(2)}/mês</strong>
+                  <strong className="text-slate-900">R$ {selectedPlanObj.price.toFixed(2).replace('.', ',')}/mês</strong>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Vencimento Escolhido:</span>
