@@ -11,7 +11,7 @@ import { useAuth } from './lib/AuthContext';
 import { Client, INITIAL_CLIENTS, PLANS, ClientStatus } from './types';
 import { sendClientToIxc, checkClientInIxc } from './lib/ixcService';
 import { db, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, handleFirestoreError, OperationType } from './lib/firebase';
-import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus, RefreshCw, Edit } from 'lucide-react';
+import { Info, CheckCircle2, AlertTriangle, Users, Monitor, ShieldCheck, HelpCircle, Activity, ServerCrash, X, Calendar, MapPin, Eye, ExternalLink, Check, Copy, LogOut, UserPlus, RefreshCw, Edit, Trash2 } from 'lucide-react';
 
 export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -298,7 +298,7 @@ export default function App() {
       const docRef = doc(db, 'clients', id);
       await deleteDoc(docRef);
       if (clientToRemove) {
-        triggerToast(`Fidelização de "${clientToRemove.name}" foi desativada e removida de todos os dispositivos.`, 'danger');
+        triggerToast(`Cadastro de "${clientToRemove.name}" foi excluído com sucesso.`, 'info');
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `clients/${id}`);
@@ -306,6 +306,10 @@ export default function App() {
     
     if (editingClient && editingClient.id === id) {
       setEditingClient(null);
+    }
+    if (notificationClient && notificationClient.id === id) {
+      setNotificationClient(null);
+      setModalIxcError(null);
     }
   };
 
@@ -825,29 +829,51 @@ export default function App() {
                   </button>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-2 font-sans">
-                  <button
-                    onClick={() => {
-                      const clientToEdit = notificationClient;
-                      setNotificationClient(null);
-                      setModalIxcError(null);
-                      handleStartEdit(clientToEdit);
-                    }}
-                    className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <Edit className="w-3.5 h-3.5 text-amber-600" />
-                    ✏️ Corrigir / Editar Dados
-                  </button>
+                <div className="flex flex-col gap-2 font-sans pt-1">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const clientToEdit = notificationClient;
+                        setNotificationClient(null);
+                        setModalIxcError(null);
+                        handleStartEdit(clientToEdit);
+                      }}
+                      className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Edit className="w-3.5 h-3.5 text-amber-600" />
+                      ✏️ Corrigir / Editar
+                    </button>
 
+                    <button
+                      onClick={() => {
+                        handleDismissNotification(notificationClient.id);
+                        setNotificationClient(null);
+                        setModalIxcError(null);
+                      }}
+                      className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
+                    >
+                      📁 Marcar Como Lido
+                    </button>
+                  </div>
+
+                  {/* Opção de Exclusão por Falta de Viabilidade */}
                   <button
+                    type="button"
                     onClick={() => {
-                      handleDismissNotification(notificationClient.id);
-                      setNotificationClient(null);
-                      setModalIxcError(null);
+                      const msg = notificationClient.ixcId
+                        ? `ATENÇÃO: Este cliente já consta no IXC (ID #${notificationClient.ixcId}).\n\nDeseja realmente EXCLUIR o cadastro de "${notificationClient.name}" do portal por falta de viabilidade / cancelamento?`
+                        : `Deseja realmente EXCLUIR o cadastro de "${notificationClient.name}" por falta de viabilidade técnica?\n\nEsta ação apagará permanentemente a solicitação.`;
+                      if (window.confirm(msg)) {
+                        const idToDelete = notificationClient.id;
+                        setNotificationClient(null);
+                        setModalIxcError(null);
+                        handleDeleteClient(idToDelete);
+                      }
                     }}
-                    className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
+                    className="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    📁 Marcar Como Lido
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    🗑️ Excluir Cadastro (Sem Viabilidade)
                   </button>
                 </div>
               </div>
