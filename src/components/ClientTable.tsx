@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Client, PlanId, DueDate, ClientStatus, PLANS, DUE_DATES } from '../types';
-import { Search, Eye, Filter, Edit, Trash2, Calendar, HardDrive, MapPin, CheckCircle, Clock, AlertTriangle, CloudDownload, RefreshCw } from 'lucide-react';
+import { Search, Eye, Filter, Edit, Trash2, Calendar, HardDrive, MapPin, CheckCircle, Clock, AlertTriangle, AlertCircle, CloudDownload, RefreshCw } from 'lucide-react';
 import { checkClientInIxc } from '../lib/ixcService';
 
 interface ClientTableProps {
@@ -8,7 +8,7 @@ interface ClientTableProps {
   onEdit: (client: Client) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, state: ClientStatus) => void;
-  onSyncIxc?: (client: Client) => Promise<void>;
+  onSyncIxc?: (client: Client) => Promise<any>;
 }
 
 export default function ClientTable({ clients, onEdit, onDelete, onStatusChange, onSyncIxc }: ClientTableProps) {
@@ -19,6 +19,17 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
   const [filterPeriod, setFilterPeriod] = useState<string>('todos');
   const [customMonth, setCustomMonth] = useState<string>('');
   const [selectedClientDetail, setSelectedClientDetail] = useState<Client | null>(null);
+  const [modalIxcError, setModalIxcError] = useState<string | null>(null);
+
+  const handleOpenDetailModal = (client: Client) => {
+    setModalIxcError(null);
+    setSelectedClientDetail(client);
+  };
+
+  const handleCloseDetailModal = () => {
+    setModalIxcError(null);
+    setSelectedClientDetail(null);
+  };
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [ixcLookupState, setIxcLookupState] = useState<{
     loading: boolean;
@@ -71,8 +82,16 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
   const handleSyncClick = async (client: Client) => {
     if (!onSyncIxc) return;
     setSyncingId(client.id);
+    setModalIxcError(null);
     try {
-      await onSyncIxc(client);
+      const res = await onSyncIxc(client);
+      if (res && res.success === false) {
+        setModalIxcError(res.error || 'Falha ao processar cadastro no IXC.');
+      } else if (res && res.success) {
+        setModalIxcError(null);
+      }
+    } catch (err: any) {
+      setModalIxcError(err?.message || 'Falha desconhecida na integração.');
     } finally {
       setSyncingId(null);
     }
@@ -491,7 +510,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                         ) : client.ixcStatus?.toLowerCase().includes('já') || client.ixcStatus?.toLowerCase().includes('duplicado') || client.ixcStatus?.toLowerCase().includes('encontrado') ? (
                           <button
                             type="button"
-                            onClick={() => setSelectedClientDetail(client)}
+                            onClick={() => handleOpenDetailModal(client)}
                             className="inline-flex items-center gap-1 text-[10.5px] font-black px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer shadow-3xs"
                             title={client.ixcStatus || "Cliente já possui cadastro no IXC. Clique para vincular."}
                           >
@@ -564,7 +583,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
 
                         {/* Botão rápido para detalhar endereço */}
                         <button
-                          onClick={() => setSelectedClientDetail(client)}
+                          onClick={() => handleOpenDetailModal(client)}
                           className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-blue-600 border border-slate-200 cursor-pointer transition-colors shadow-3xs"
                           title="Ver detalhes de instalação"
                         >
@@ -630,7 +649,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
       {selectedClientDetail && (
         <div 
           className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in"
-          onClick={() => setSelectedClientDetail(null)}
+          onClick={handleCloseDetailModal}
         >
           <div 
             className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden"
@@ -646,7 +665,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                 <h4 className="text-base font-black mt-1 text-white max-w-[280px] truncate">{selectedClientDetail.name}</h4>
               </div>
               <button 
-                onClick={() => setSelectedClientDetail(null)} 
+                onClick={handleCloseDetailModal} 
                 className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800 border border-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -795,6 +814,17 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
             {/* Rodapé popup com as Ações de Conferência */}
             <div className="bg-slate-50 p-4 border-t border-slate-150 space-y-2.5">
               
+              {/* Alerta de Erro IXC visível dentro da própria modal */}
+              {modalIxcError && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 flex items-start gap-2.5 text-xs text-left animate-shake">
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <strong className="block font-black text-rose-950 mb-0.5">Aviso do IXC Soft:</strong>
+                    <p className="leading-relaxed">{modalIxcError}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Botão de Envio / Aprovação no IXC */}
               {!selectedClientDetail.ixcId && onSyncIxc && (
                 <button
@@ -821,7 +851,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                   type="button"
                   onClick={() => {
                     const clientToEdit = selectedClientDetail;
-                    setSelectedClientDetail(null);
+                    handleCloseDetailModal();
                     onEdit(clientToEdit);
                   }}
                   className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
@@ -832,7 +862,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
 
                 <button
                   type="button"
-                  onClick={() => setSelectedClientDetail(null)}
+                  onClick={handleCloseDetailModal}
                   className="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
                 >
                   📁 Fechar Ficha

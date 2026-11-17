@@ -190,8 +190,11 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
     if (!formData.email.trim() || !formData.email.includes('@')) {
       errors.email = 'Insira um e-mail válido.';
     }
-    if (!formData.cep.trim() || formData.cep.replace(/\D/g, '').length !== 8) {
-      errors.cep = 'Insira o CEP.';
+    const cleanCep = formData.cep.replace(/\D/g, '');
+    if (!formData.cep.trim() || cleanCep.length !== 8) {
+      errors.cep = 'Insira um CEP válido de 8 dígitos (ex: 65540-000).';
+    } else if (/^0+$/.test(cleanCep)) {
+      errors.cep = 'O CEP não pode conter apenas zeros.';
     }
     if (!formData.address.trim()) errors.address = 'Rua/Logradouro é obrigatório.';
     if (!formData.number.trim()) errors.number = 'Nº é obrigatório.';

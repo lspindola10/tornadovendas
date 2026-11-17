@@ -29,6 +29,7 @@ export default function App() {
     ixcId?: string;
     razao?: string;
   }>({ loading: false });
+  const [modalIxcError, setModalIxcError] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   
@@ -36,13 +37,15 @@ export default function App() {
 
   const isFirstLoad = useRef(true);
   const previousClientsRef = useRef<Client[]>([]);
+  const toastTimerRef = useRef<any>(null);
 
-  // Mostra mensagens flutuantes temporárias (Toasts)
-  const triggerToast = (text: string, type: 'success' | 'info' | 'danger' = 'success') => {
+  // Mostra mensagens flutuantes temporárias (Toasts) com controle de tempo adaptativo
+  const triggerToast = (text: string, type: 'success' | 'info' | 'danger' = 'success', duration = type === 'danger' ? 7500 : 4500) => {
     setToastMessage({ text, type });
-    setTimeout(() => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
-    }, 4500);
+    }, duration);
   };
 
   // Sincronização em Tempo Real com Firestore
@@ -205,6 +208,7 @@ export default function App() {
   // Aprovar e enviar para o IXC dentro da modal de conferência da ficha
   const handleApproveAndSendToIxc = async (client: Client) => {
     setIsSyncingIxcId(client.id);
+    setModalIxcError(null);
     try {
       triggerToast(`Conferindo e cadastrando "${client.name}" no IXC Soft...`, 'info');
       const result = await sendClientToIxc(client);
@@ -217,16 +221,21 @@ export default function App() {
           isNewNotification: false
         });
         setNotificationClient(null);
+        setModalIxcError(null);
         if (result.alreadyExists) {
           triggerToast(`⚠️ "${client.name}" já constava no IXC (ID #${result.ixcId}). Cadastro vinculado com sucesso sem duplicar!`, 'info');
         } else {
           triggerToast(`🎉 Concluído! Cliente "${client.name}" cadastrado no IXC Soft com o ID #${result.ixcId}!`, 'success');
         }
       } else {
-        triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
+        const errorMsg = result.error || 'Falha ao processar cadastro no IXC';
+        setModalIxcError(errorMsg);
+        triggerToast(`Aviso IXC: ${errorMsg}`, 'danger');
       }
     } catch (err: any) {
-      triggerToast(`Erro de conexão com IXC: ${err?.message || 'Falha desconhecida'}`, 'danger');
+      const errorMsg = err?.message || 'Falha desconhecida';
+      setModalIxcError(errorMsg);
+      triggerToast(`Erro de conexão com IXC: ${errorMsg}`, 'danger');
     } finally {
       setIsSyncingIxcId(null);
     }
@@ -234,6 +243,7 @@ export default function App() {
 
   // Sincronizar cliente específico com o IXC Soft
   const handleSyncClientToIxc = async (client: Client) => {
+    setIsSyncingIxcId(client.id);
     try {
       triggerToast(`Conferindo e enviando "${client.name}" para o IXC Soft...`, 'info');
       const result = await sendClientToIxc(client);
@@ -248,11 +258,18 @@ export default function App() {
         } else {
           triggerToast(`Cliente cadastrado no IXC com sucesso! Código: #${result.ixcId}`, 'success');
         }
+        return result;
       } else {
-        triggerToast(`Aviso IXC: ${result.error || 'Falha ao processar cadastro no IXC'}`, 'danger');
+        const errorMsg = result.error || 'Falha ao processar cadastro no IXC';
+        triggerToast(`Aviso IXC: ${errorMsg}`, 'danger');
+        return { success: false, error: errorMsg };
       }
     } catch (err: any) {
-      triggerToast(`Erro de conexão com IXC: ${err?.message || 'Falha desconhecida'}`, 'danger');
+      const errorMsg = err?.message || 'Falha desconhecida';
+      triggerToast(`Erro de conexão com IXC: ${errorMsg}`, 'danger');
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsSyncingIxcId(null);
     }
   };
 
@@ -482,24 +499,6 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
-        {/* Toast Notificação Flutuante */}
-        {toastMessage && (
-          <div 
-            className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4.5 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-semibold transition-all animate-bounce max-w-[420px] ${
-              toastMessage.type === 'success' 
-                ? 'bg-emerald-50 text-emerald-900 border-emerald-250' 
-                : toastMessage.type === 'danger'
-                ? 'bg-rose-50 text-rose-900 border-rose-250'
-                : 'bg-indigo-50 text-indigo-900 border-indigo-250'
-            }`}
-          >
-            {toastMessage.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />}
-            {toastMessage.type === 'danger' && <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0" />}
-            {toastMessage.type === 'info' && <Info className="w-5 h-5 text-indigo-600 flex-shrink-0" />}
-            <span>{toastMessage.text}</span>
-          </div>
-        )}
 
         {/* MODO PORTAL DO CLIENTE (Autoatendimento Intuitivo) */}
         {viewMode === 'customer' ? (
@@ -670,7 +669,7 @@ export default function App() {
                 <h4 className="text-base font-black mt-1 text-white max-w-[320px] truncate">{notificationClient.name}</h4>
               </div>
               <button 
-                onClick={() => setNotificationClient(null)} 
+                onClick={() => { setNotificationClient(null); setModalIxcError(null); }} 
                 className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800 border border-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -795,6 +794,17 @@ export default function App() {
               <div className="border-t border-slate-150 pt-4 space-y-2.5">
                 <span className="text-xs font-bold text-slate-700 block text-left">Ações de Conferência:</span>
                 
+                {/* Alerta de Erro IXC dentro da modal para conferência imediata */}
+                {modalIxcError && (
+                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 flex items-start gap-2.5 text-xs text-left animate-shake">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <strong className="block font-black text-rose-950 mb-0.5">Aviso do IXC Soft:</strong>
+                      <p className="leading-relaxed">{modalIxcError}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Botão de Envio para o IXC APÓS CONFERIR */}
                 {!notificationClient.ixcId && (
                   <button
@@ -820,6 +830,7 @@ export default function App() {
                     onClick={() => {
                       const clientToEdit = notificationClient;
                       setNotificationClient(null);
+                      setModalIxcError(null);
                       handleStartEdit(clientToEdit);
                     }}
                     className="flex-1 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
@@ -832,6 +843,7 @@ export default function App() {
                     onClick={() => {
                       handleDismissNotification(notificationClient.id);
                       setNotificationClient(null);
+                      setModalIxcError(null);
                     }}
                     className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black cursor-pointer transition-colors"
                   >
@@ -845,7 +857,7 @@ export default function App() {
             {/* Rodapé modal */}
             <div className="bg-slate-50 px-6 py-4 border-t border-slate-150 flex justify-end">
               <button
-                onClick={() => setNotificationClient(null)}
+                onClick={() => { setNotificationClient(null); setModalIxcError(null); }}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
               >
                 Voltar à Lista
@@ -873,6 +885,36 @@ export default function App() {
             />
           </div>
         </div>
+      )}
+
+      {/* Toast Notificação Flutuante Global (Prioridade visual absoluta com z-[9999] acima de qualquer modal) */}
+      {toastMessage && (
+        <aside 
+          role="status"
+          aria-live="polite"
+          className={`fixed top-5 right-5 z-[9999] flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold transition-all max-w-[460px] animate-fade-in ${
+            toastMessage.type === 'success' 
+              ? 'bg-emerald-50 text-emerald-950 border-emerald-300 shadow-emerald-500/20' 
+              : toastMessage.type === 'danger'
+              ? 'bg-rose-50 text-rose-950 border-rose-300 shadow-rose-500/20'
+              : 'bg-indigo-50 text-indigo-950 border-indigo-300 shadow-indigo-500/20'
+          }`}
+        >
+          {toastMessage.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />}
+          {toastMessage.type === 'danger' && <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />}
+          {toastMessage.type === 'info' && <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />}
+          <div className="flex-1 text-left leading-snug">
+            {toastMessage.text}
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setToastMessage(null)}
+            className="text-slate-400 hover:text-slate-700 p-1 -mr-1 rounded-lg transition-colors cursor-pointer"
+            title="Fechar aviso"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </aside>
       )}
 
     </div>

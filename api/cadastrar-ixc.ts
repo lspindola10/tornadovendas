@@ -29,6 +29,14 @@ function formatCpf(cpf: string): string {
   return cpf || '';
 }
 
+function formatCep(cep?: string): string {
+  const clean = (cep || '').replace(/\D/g, '');
+  if (clean.length === 8) {
+    return `${clean.slice(0, 5)}-${clean.slice(5, 8)}`;
+  }
+  return cep || '';
+}
+
 /**
  * Consulta se o cliente já existe no banco de dados do IXC buscando por CPF formatado ou limpo.
  */
@@ -136,7 +144,8 @@ export async function handleIxcRegistration(payload: ClientPayload) {
   try {
     const rawCityName = (payload.city || '').split('-')[0].trim();
     if (rawCityName) {
-      const cityRes = await fetch(`${ixcUrl}/webservice/v1/cidade`, {
+      // 1ª Tentativa: busca exata pelo nome da cidade
+      let cityRes = await fetch(`${ixcUrl}/webservice/v1/cidade`, {
         method: 'POST',
         headers: {
           'Authorization': authHeader,
@@ -146,19 +155,39 @@ export async function handleIxcRegistration(payload: ClientPayload) {
         body: JSON.stringify({
           qtype: 'cidade.nome',
           query: rawCityName,
-          oper: 'L',
+          oper: '=',
           page: '1',
-          rp: '5'
+          rp: '10'
         })
       });
 
-      if (cityRes.ok) {
-        const cityData = await cityRes.json();
-        if (cityData?.registros && cityData.registros.length > 0) {
-          const matched = cityData.registros.find((c: any) => c.uf === '16') || cityData.registros[0];
-          resolvedCidadeId = String(matched.id);
-          resolvedUf = String(matched.uf || '16');
-        }
+      let cityData = cityRes.ok ? await cityRes.json() : null;
+
+      // 2ª Tentativa: busca parcial (LIKE) com limite maior para garantir encontrar no MA
+      if (!cityData?.registros || cityData.registros.length === 0) {
+        cityRes = await fetch(`${ixcUrl}/webservice/v1/cidade`, {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'ixcsoft': 'listar',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            qtype: 'cidade.nome',
+            query: rawCityName,
+            oper: 'L',
+            page: '1',
+            rp: '50'
+          })
+        });
+        cityData = cityRes.ok ? await cityRes.json() : null;
+      }
+
+      if (cityData?.registros && cityData.registros.length > 0) {
+        // Prioriza a cidade do estado do Maranhão (UF 16)
+        const matched = cityData.registros.find((c: any) => String(c.uf) === '16') || cityData.registros[0];
+        resolvedCidadeId = String(matched.id);
+        resolvedUf = String(matched.uf || '16');
       }
     }
   } catch (err) {
@@ -173,10 +202,18 @@ export async function handleIxcRegistration(payload: ClientPayload) {
     payload.additionalServices?.length ? `Serviços adicionais: ${payload.additionalServices.join(', ')}` : '',
     payload.addressReference ? `Ponto de Referência: ${payload.addressReference}` : '',
     payload.naturalidade ? `Naturalidade: ${payload.naturalidade}` : '',
+    (payload.motherName || payload.fatherName) ? `Filiação: Mãe: ${payload.motherName || '-'} | Pai: ${payload.fatherName || '-'}` : '',
     `Data do cadastro: ${new Date().toLocaleString('pt-BR')}`
-  ].filter(Boolean).join(' | ');
+  ].filter(Boolean).join('\n');
 
-  // 3. Montar dados para inserção no endpoint /webservice/v1/cliente
+  // 3. Validar e formatar CEP conforme regras do IXC (obrigatório 8 dígitos e formato 00000-000 com hífen)
+  const cleanCep = (payload.cep || '').replace(/\D/g, '');
+  if (!cleanCep || cleanCep.length !== 8 || /^0+$/.test(cleanCep)) {
+    throw new Error("O campo 'CEP' não pode estar vazio, não pode conter apenas zeros e deve conter 8 dígitos (ex: 65540-000). Corrija o CEP na ficha.");
+  }
+  const formattedCep = formatCep(payload.cep);
+
+  // 4. Montar dados para inserção no endpoint /webservice/v1/cliente
   const clientBody = {
     ativo: 'S',
     tipo_pessoa: 'F',
@@ -189,7 +226,14 @@ export async function handleIxcRegistration(payload: ClientPayload) {
     bairro: (payload.neighborhood || '').toUpperCase().trim(),
     cidade: resolvedCidadeId,
     uf: resolvedUf,
-    cep: (payload.cep || '').replace(/\D/g, ''),
+    cep: formattedCep,
+    endereco_cob: (payload.address || '').toUpperCase().trim(),
+    numero_cob: (payload.number || 'SN').toUpperCase().trim(),
+    bairro_cob: (payload.neighborhood || '').toUpperCase().trim(),
+    cidade_cob: resolvedCidadeId,
+    uf_cob: resolvedUf,
+    cep_cob: formattedCep,
+    referencia_cob: (payload.addressReference || '').toUpperCase().trim(),
     tipo_assinante: '3', // Residencial
     iss_classificacao_padrao: '99',
     contribuinte_icms: 'N',
@@ -198,6 +242,10 @@ export async function handleIxcRegistration(payload: ClientPayload) {
     telefone_celular: (payload.phone || '').trim(),
     whatsapp: (payload.phone || '').trim(),
     email: (payload.email || '').toLowerCase().trim(),
+    hotsite_email: (payload.email || '').toLowerCase().trim(),
+    cob_envia_email: 'S',
+    cob_envia_sms: 'S',
+    participa_cobranca: 'S',
     data_nascimento: payload.birthDate || '',
     nome_pai: (payload.fatherName || '').toUpperCase().trim(),
     nome_mae: (payload.motherName || '').toUpperCase().trim(),

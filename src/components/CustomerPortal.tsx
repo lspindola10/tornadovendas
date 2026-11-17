@@ -255,7 +255,11 @@ export default function CustomerPortal({ onRegisterSuccess }: CustomerPortalProp
 
     if (currentStep === 2) {
       const cleanCep = cep.replace(/\D/g, '');
-      if (cleanCep.length !== 8) errors.cep = 'Por favor, digite seu CEP de 8 dígitos.';
+      if (cleanCep.length !== 8) {
+        errors.cep = 'Por favor, digite seu CEP de 8 dígitos.';
+      } else if (/^0+$/.test(cleanCep)) {
+        errors.cep = 'O CEP não pode conter apenas zeros.';
+      }
       if (!address.trim()) errors.address = 'Informe a rua correspondente.';
       if (!number.trim()) errors.number = 'Informe o número.';
       if (!neighborhood.trim()) errors.neighborhood = 'Informe o bairro.';
