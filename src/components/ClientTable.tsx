@@ -144,22 +144,22 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
     switch (status) {
       case 'Ativo':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-450 animate-pulse shadow-sm shadow-emerald-400/50"></span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Ativo
           </span>
         );
       case 'Pendente':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-450 animate-ping"></span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
             Instalação Pendente
           </span>
         );
       case 'Bloqueado':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-450"></span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
             Bloqueado
           </span>
         );
@@ -399,16 +399,16 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
         {filteredClients.length > 0 ? (
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/75 border-b border-slate-150 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                <th className="py-3 px-4 w-full">Nome & Contato</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Data do Cadastro</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Origem</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">IXC Soft</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Plano Ativo</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Mensalidade</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Vencimento</th>
-                <th className="py-3 px-2 text-center w-1 whitespace-nowrap">Status</th>
-                <th className="py-3 px-4 text-right w-1 whitespace-nowrap">Ações</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4 w-full">Nome & Contato</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Data Cadastro</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Origem</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">IXC Soft</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Plano Ativo</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Mensalidade</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Vencimento</th>
+                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Status</th>
+                <th className="py-3.5 px-4 text-right w-1 whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -417,130 +417,155 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                 return (
                   <tr 
                     key={client.id} 
-                    className="hover:bg-slate-50/70 transition-colors group text-sm text-slate-655"
+                    className="hover:bg-slate-50/80 transition-colors group text-sm text-slate-700"
                   >
                     
                     {/* Nome & Contato */}
-                    <td className="py-4 px-4 text-left">
+                    <td className="py-4.5 px-4 text-left">
                       <div>
-                        <p className="font-extrabold text-slate-900 font-sans group-hover:text-cyan-600 transition-colors">
+                        <p className="font-extrabold text-slate-900 font-sans group-hover:text-blue-600 transition-colors text-sm">
                           {client.name}
                         </p>
-                        <p className="text-[11px] text-slate-500 font-sans mt-0.5">
-                          CPF: {client.cpf} • {client.phone}
-                        </p>
-                        <p className="text-[11px] text-slate-450 font-sans">
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 font-sans mt-0.5">
+                          <span className="font-mono text-[11px] text-slate-600">CPF: {client.cpf}</span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-[11px]">{client.phone}</span>
+                          {client.phone && (
+                            <a
+                              href={`https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${client.name.split(' ')[0]}! Tudo bem? Sou da Tornado Fibra e estou acompanhando seu cadastro.`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-md transition-colors shadow-3xs"
+                              title="Abrir conversa no WhatsApp"
+                            >
+                              <svg className="w-3 h-3 fill-[#25D366]" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
+                              <span>WhatsApp</span>
+                            </a>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-sans mt-0.5">
                           {client.email}
                         </p>
                       </div>
                     </td>
 
                     {/* Data do Cadastro */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
                       <div className="flex flex-col items-center justify-center">
-                        <span className="text-[11px] font-bold text-slate-700">
+                        <span className="text-xs font-bold text-slate-800">
                           {new Date(client.createdAt).toLocaleDateString('pt-BR')}
                         </span>
-                        <span className="text-[10px] text-slate-500 mt-0.5">
-                          <Clock className="w-2.5 h-2.5 inline mr-1" />
+                        <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 font-mono">
+                          <Clock className="w-2.5 h-2.5 text-slate-400" />
                           {new Date(client.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </td>
 
                     {/* Origem */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
                       <div className="inline-flex flex-col items-center justify-center">
                         {client.selfRegistered ? (
-                          <span className="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-orange-50 text-orange-600 border border-orange-200">
-                            Auto Atendimento
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200">
+                            Autoatendimento
                           </span>
                         ) : (
-                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
-                            Usuário: {client.registeredBy || 'Sistema'}
+                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
+                            {client.registeredBy || 'Painel'}
                           </span>
                         )}
                       </div>
                     </td>
 
-                    {/* IXC Soft Status */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
-                      <div className="inline-flex flex-col items-center justify-center">
+                    {/* IXC Soft Status Inteligente */}
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center justify-center">
                         {client.ixcId ? (
                           <span 
-                            className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                            className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs"
                             title={`Cadastrado no IXC Soft com ID: ${client.ixcId}`}
                           >
-                            <CheckCircle className="w-2.5 h-2.5 text-emerald-600" />
-                            #{client.ixcId}
+                            <CheckCircle className="w-3 h-3 text-emerald-600" />
+                            IXC #{client.ixcId}
                           </span>
+                        ) : client.ixcStatus?.toLowerCase().includes('já') || client.ixcStatus?.toLowerCase().includes('duplicado') || client.ixcStatus?.toLowerCase().includes('encontrado') ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedClientDetail(client)}
+                            className="inline-flex items-center gap-1 text-[10.5px] font-black px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer shadow-3xs"
+                            title={client.ixcStatus || "Cliente já possui cadastro no IXC. Clique para vincular."}
+                          >
+                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                            Já no IXC
+                          </button>
                         ) : onSyncIxc ? (
                           <button
                             type="button"
                             onClick={() => handleSyncClick(client)}
                             disabled={syncingId === client.id}
-                            className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer disabled:opacity-50"
-                            title={client.ixcStatus || "Clique para enviar este cadastro ao IXC Soft"}
+                            className="inline-flex items-center gap-1 text-[10.5px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition-colors cursor-pointer disabled:opacity-50 shadow-3xs"
+                            title="Enviar cadastro ao ERP IXC Soft"
                           >
-                            <RefreshCw className={`w-2.5 h-2.5 text-amber-600 ${syncingId === client.id ? 'animate-spin' : ''}`} />
-                            {syncingId === client.id ? 'Enviando...' : 'Enviar IXC'}
+                            <RefreshCw className={`w-3 h-3 text-slate-500 ${syncingId === client.id ? 'animate-spin text-blue-600' : ''}`} />
+                            {syncingId === client.id ? 'Enviando...' : '+ Enviar IXC'}
                           </button>
                         ) : (
-                          <span className="text-[10px] text-slate-400">Pendente</span>
+                          <span className="text-xs text-slate-400">Pendente</span>
                         )}
                       </div>
                     </td>
 
                     {/* Plano Ativo */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
                       <div className="inline-flex flex-col items-center justify-center">
-                        <span className={`inline-block text-[10px] font-extrabold px-2.5 py-0.5 rounded-md ${planDetails.badgeBg}`}>
+                        <span className={`inline-block text-[11px] font-black px-2.5 py-0.5 rounded-md ${planDetails.badgeBg}`}>
                           {planDetails.speed}
                         </span>
-                        <span className="text-[10px] text-slate-500 mt-0.5">{planDetails.name}</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5 font-medium">{planDetails.name}</span>
                       </div>
                     </td>
 
                     {/* Preço do plano */}
-                    <td className="py-4 px-2 text-center font-bold text-slate-900 whitespace-nowrap">
-                      R$ {planDetails.price.toFixed(2)}
+                    <td className="py-4.5 px-3 text-center font-black text-slate-900 whitespace-nowrap text-sm">
+                      R$ {planDetails.price.toFixed(2).replace('.', ',')}
                     </td>
 
                     {/* Vencimento da Fatura */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold font-mono text-slate-700 bg-slate-55 border border-slate-200/90 px-2 py-1 rounded">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold font-mono text-slate-700 bg-slate-50 border border-slate-200 px-2 py-1 rounded-md">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         Dia {client.dueDate}
                       </span>
                     </td>
 
-                    {/* Status do Cliente */}
-                    <td className="py-4 px-2 text-center whitespace-nowrap">
-                      <div className="flex flex-col items-center justify-center gap-2">
+                    {/* Status do Cliente (Sem botão verde gigante poluindo a coluna) */}
+                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center">
                         {getStatusBadge(client.status)}
-                        {client.status === 'Pendente' && client.phone && (
+                      </div>
+                    </td>
+
+                    {/* Ações (WhatsApp, Detalhes, Editar, Deletar) */}
+                    <td className="py-4.5 px-4 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                        
+                        {/* Botão rápido para conversar/notificar no WhatsApp */}
+                        {client.phone && (
                           <a
                             href={`https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Obrigado por escolher a TORNADO FIBRA.\nSeu cadastro já foi processado com sucesso e sua instalação será realizada em até 24 horas.\n\nAguarde nosso contato. Assim que o técnico estiver a caminho da sua residência, avisaremos a você.\n\nTORNADO FIBRA — Conectando você ao Mundo.`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center w-full gap-1.5 px-2 py-1.5 bg-[#25D366] hover:bg-[#1EBE5A] text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors shadow-sm shadow-[#25D366]/20 whitespace-nowrap"
-                            title="Enviar mensagem no WhatsApp"
+                            className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 cursor-pointer transition-colors shadow-3xs"
+                            title="Notificar cliente via WhatsApp"
                           >
-                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
-                            Notificar Cliente
+                            <svg className="w-4 h-4 fill-emerald-600" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
                           </a>
                         )}
-                      </div>
-                    </td>
 
-                    {/* Ações (Editar, Detalhes, Deletar, Bloquear/Ativar rápidos) */}
-                    <td className="py-4 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
-                        
                         {/* Botão rápido para detalhar endereço */}
                         <button
                           onClick={() => setSelectedClientDetail(client)}
-                          className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-550 hover:text-cyan-600 border border-slate-200/80 hover:border-cyan-500/20 cursor-pointer transition-colors"
+                          className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-blue-600 border border-slate-200 cursor-pointer transition-colors shadow-3xs"
                           title="Ver detalhes de instalação"
                         >
                           <Eye className="w-4 h-4" />
@@ -549,7 +574,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                         {/* Botão de Edição */}
                         <button
                           onClick={() => onEdit(client)}
-                          className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200/50 cursor-pointer transition-colors"
+                          className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 cursor-pointer transition-colors shadow-3xs"
                           title="Editar cadastro do assinante"
                         >
                           <Edit className="w-4 h-4" />
@@ -562,7 +587,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                               onDelete(client.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/50 cursor-pointer transition-colors"
+                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 cursor-pointer transition-colors shadow-3xs"
                           title="Remover cliente"
                         >
                           <Trash2 className="w-4 h-4" />
