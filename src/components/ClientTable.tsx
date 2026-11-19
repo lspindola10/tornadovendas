@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Client, PlanId, DueDate, ClientStatus, PLANS, DUE_DATES } from '../types';
-import { Search, Eye, Filter, Edit, Trash2, Calendar, HardDrive, MapPin, CheckCircle, Clock, AlertTriangle, AlertCircle, CloudDownload, RefreshCw } from 'lucide-react';
+import { Search, Eye, Filter, Edit, Trash2, Calendar, HardDrive, MapPin, CheckCircle, Clock, AlertTriangle, AlertCircle, CloudDownload, RefreshCw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { checkClientInIxc } from '../lib/ixcService';
 
 interface ClientTableProps {
@@ -18,8 +18,15 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [filterPeriod, setFilterPeriod] = useState<string>('todos');
   const [customMonth, setCustomMonth] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [selectedClientDetail, setSelectedClientDetail] = useState<Client | null>(null);
   const [modalIxcError, setModalIxcError] = useState<string | null>(null);
+
+  // Reinicia para a primeira página sempre que qualquer filtro mudar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterPlan, filterDueDate, filterStatus, filterPeriod, customMonth, pageSize]);
 
   const handleOpenDetailModal = (client: Client) => {
     setModalIxcError(null);
@@ -159,25 +166,32 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
     return matchesSearch && matchesPlan && matchesDueDate && matchesStatus && matchesPeriod;
   });
 
+  // Cálculo de Paginação
+  const totalPages = Math.ceil(filteredClients.length / pageSize) || 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filteredClients.length);
+  const paginatedClients = filteredClients.slice(startIndex, endIndex);
+
   const getStatusBadge = (status: ClientStatus) => {
     switch (status) {
       case 'Ativo':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Ativo
           </span>
         );
       case 'Pendente':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200" title="Instalação Pendente">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-            Instalação Pendente
+            Pendente
           </span>
         );
       case 'Bloqueado':
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
             Bloqueado
           </span>
@@ -290,6 +304,8 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                 setFilterStatus('todos');
                 setFilterPeriod('todos');
                 setCustomMonth('');
+                setCurrentPage(1);
+                setPageSize(10);
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors cursor-pointer border border-slate-200/55"
               title="Limpar todos os filtros"
@@ -416,92 +432,70 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
       {/* Tabela Principal de Clientes */}
       <div className="overflow-x-auto">
         {filteredClients.length > 0 ? (
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-auto">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-full">Nome & Contato</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Data Cadastro</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Origem</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">IXC Soft</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Plano Ativo</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Mensalidade</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Vencimento</th>
-                <th className="py-3.5 px-3 text-center w-1 whitespace-nowrap">Status</th>
-                <th className="py-3.5 px-4 text-right w-1 whitespace-nowrap">Ações</th>
+              <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                <th className="py-3 px-3.5 text-left">Nome & Contato</th>
+                <th className="py-3 px-2 text-center whitespace-nowrap">Data / Origem</th>
+                <th className="py-3 px-2 text-center whitespace-nowrap">IXC Soft</th>
+                <th className="py-3 px-2 text-center whitespace-nowrap">Plano / Valor</th>
+                <th className="py-3 px-2 text-center whitespace-nowrap">Vencimento</th>
+                <th className="py-3 px-2 text-center whitespace-nowrap">Status</th>
+                <th className="py-3 px-3.5 text-right whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredClients.map(client => {
+              {paginatedClients.map(client => {
                 const planDetails = PLANS.find(p => p.id === client.planId) || PLANS[0];
                 return (
                   <tr 
                     key={client.id} 
-                    className="hover:bg-slate-50/80 transition-colors group text-sm text-slate-700"
+                    className="hover:bg-blue-50/30 transition-colors group text-sm text-slate-700"
                   >
                     
                     {/* Nome & Contato */}
-                    <td className="py-4.5 px-4 text-left">
+                    <td className="py-2.5 px-3.5 text-left">
                       <div>
-                        <p className="font-extrabold text-slate-900 font-sans group-hover:text-blue-600 transition-colors text-sm">
+                        <p className="font-extrabold text-slate-900 font-sans group-hover:text-blue-600 transition-colors text-xs sm:text-sm">
                           {client.name}
                         </p>
-                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 font-sans mt-0.5">
-                          <span className="font-mono text-[11px] text-slate-600">CPF: {client.cpf}</span>
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 font-sans mt-0.5">
+                          <span className="font-mono text-slate-600">CPF: {client.cpf}</span>
                           <span className="text-slate-300">•</span>
-                          <span className="text-[11px]">{client.phone}</span>
-                          {client.phone && (
-                            <a
-                              href={`https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${client.name.split(' ')[0]}! Tudo bem? Sou da Tornado Fibra e estou acompanhando seu cadastro.`)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-md transition-colors shadow-3xs"
-                              title="Abrir conversa no WhatsApp"
-                            >
-                              <svg className="w-3 h-3 fill-[#25D366]" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
-                              <span>WhatsApp</span>
-                            </a>
-                          )}
+                          <span>{client.phone}</span>
                         </div>
-                        <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                        <p className="text-[10.5px] text-slate-400 font-sans truncate max-w-[200px]" title={client.email}>
                           {client.email}
                         </p>
                       </div>
                     </td>
 
-                    {/* Data do Cadastro */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                    {/* Data / Origem */}
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <div className="flex flex-col items-center justify-center">
                         <span className="text-xs font-bold text-slate-800">
                           {new Date(client.createdAt).toLocaleDateString('pt-BR')}
                         </span>
-                        <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 font-mono">
-                          <Clock className="w-2.5 h-2.5 text-slate-400" />
-                          {new Date(client.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Origem */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
-                      <div className="inline-flex flex-col items-center justify-center">
-                        {client.selfRegistered ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200">
-                            Autoatendimento
-                          </span>
-                        ) : (
-                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
-                            {client.registeredBy || 'Painel'}
-                          </span>
-                        )}
+                        <div className="mt-0.5">
+                          {client.selfRegistered ? (
+                            <span className="inline-block text-[9.5px] font-black px-1.5 py-0.2 rounded-full bg-orange-50 text-orange-600 border border-orange-200">
+                              Autoatendimento
+                            </span>
+                          ) : (
+                            <span className="inline-block text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title={`Cadastrado por: ${client.registeredBy || 'Sistema'}`}>
+                              {client.registeredBy || 'Painel'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
 
                     {/* IXC Soft Status Inteligente */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <div className="inline-flex items-center justify-center">
                         {client.ixcId ? (
                           <span 
-                            className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs"
+                            className="inline-flex items-center gap-1 text-[10.5px] font-black px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs"
                             title={`Cadastrado no IXC Soft com ID: ${client.ixcId}`}
                           >
                             <CheckCircle className="w-3 h-3 text-emerald-600" />
@@ -511,7 +505,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                           <button
                             type="button"
                             onClick={() => handleOpenDetailModal(client)}
-                            className="inline-flex items-center gap-1 text-[10.5px] font-black px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer shadow-3xs"
+                            className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer shadow-3xs"
                             title={client.ixcStatus || "Cliente já possui cadastro no IXC. Clique para vincular."}
                           >
                             <AlertTriangle className="w-3 h-3 text-amber-600" />
@@ -522,7 +516,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                             type="button"
                             onClick={() => handleSyncClick(client)}
                             disabled={syncingId === client.id}
-                            className="inline-flex items-center gap-1 text-[10.5px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition-colors cursor-pointer disabled:opacity-50 shadow-3xs"
+                            className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition-colors cursor-pointer disabled:opacity-50 shadow-3xs"
                             title="Enviar cadastro ao ERP IXC Soft"
                           >
                             <RefreshCw className={`w-3 h-3 text-slate-500 ${syncingId === client.id ? 'animate-spin text-blue-600' : ''}`} />
@@ -534,39 +528,36 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                       </div>
                     </td>
 
-                    {/* Plano Ativo */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                    {/* Plano & Valor Mensal */}
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <div className="inline-flex flex-col items-center justify-center">
-                        <span className={`inline-block text-[11px] font-black px-2.5 py-0.5 rounded-md ${planDetails.badgeBg}`}>
+                        <span className={`inline-block text-[10.5px] font-black px-2 py-0.5 rounded-md ${planDetails.badgeBg}`}>
                           {planDetails.speed}
                         </span>
-                        <span className="text-[10px] text-slate-400 mt-0.5 font-medium">{planDetails.name}</span>
+                        <span className="font-extrabold text-slate-900 text-xs mt-0.5">
+                          R$ {planDetails.price.toFixed(2).replace('.', ',')}
+                        </span>
                       </div>
                     </td>
 
-                    {/* Preço do plano */}
-                    <td className="py-4.5 px-3 text-center font-black text-slate-900 whitespace-nowrap text-sm">
-                      R$ {planDetails.price.toFixed(2).replace('.', ',')}
-                    </td>
-
                     {/* Vencimento da Fatura */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold font-mono text-slate-700 bg-slate-50 border border-slate-200 px-2 py-1 rounded-md">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold font-mono text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
+                        <Calendar className="w-3 h-3 text-slate-400" />
                         Dia {client.dueDate}
                       </span>
                     </td>
 
-                    {/* Status do Cliente (Sem botão verde gigante poluindo a coluna) */}
-                    <td className="py-4.5 px-3 text-center whitespace-nowrap">
+                    {/* Status do Cliente */}
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
                       <div className="flex items-center justify-center">
                         {getStatusBadge(client.status)}
                       </div>
                     </td>
 
                     {/* Ações (WhatsApp, Detalhes, Editar, Deletar) */}
-                    <td className="py-4.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                    <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1">
                         
                         {/* Botão rápido para conversar/notificar no WhatsApp */}
                         {client.phone && (
@@ -577,7 +568,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                             className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 cursor-pointer transition-colors shadow-3xs"
                             title="Notificar cliente via WhatsApp"
                           >
-                            <svg className="w-4 h-4 fill-emerald-600" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
+                            <svg className="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.033c0 2.128.552 4.195 1.603 6.012L.266 23.361l5.485-1.439a11.967 11.967 0 006.28 1.761h.004c6.645 0 12.03-5.386 12.03-12.033C24 5.386 18.615 0 12.031 0zm.004 21.684c-1.802 0-3.567-.485-5.11-1.399l-.366-.217-3.8.997 1.015-3.704-.239-.38C2.531 15.352 2 13.722 2 12.033 2 6.49 6.49 2 12.035 2 17.579 2 22 6.49 22 12.033 22 17.575 17.579 21.684 12.035 21.684zm5.518-7.534c-.302-.151-1.791-.884-2.068-.985-.276-.101-.478-.151-.679.151-.201.302-.781.985-.956 1.186-.176.201-.352.226-.654.075-2.071-1.037-3.376-1.785-4.665-3.565-.176-.251.018-.389.168-.539.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.931-2.239-.245-.589-.494-.509-.679-.518-.176-.009-.377-.009-.578-.009-.201 0-.528.075-.805.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.082 2.917 1.233 3.118.151.201 2.128 3.25 5.155 4.555.72.311 1.282.497 1.722.637.723.23 1.381.197 1.9.119.584-.087 1.791-.732 2.043-1.439.252-.707.252-1.311.176-1.439-.075-.127-.277-.202-.579-.353z"/></svg>
                           </a>
                         )}
 
@@ -587,16 +578,16 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                           className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-blue-600 border border-slate-200 cursor-pointer transition-colors shadow-3xs"
                           title="Ver detalhes de instalação"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                         </button>
 
                         {/* Botão de Edição */}
                         <button
                           onClick={() => onEdit(client)}
-                          className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 cursor-pointer transition-colors shadow-3xs"
+                          className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 cursor-pointer transition-colors shadow-3xs"
                           title="Editar cadastro do assinante"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5" />
                         </button>
 
                         {/* Botão de Exclusão */}
@@ -609,7 +600,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                           className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 cursor-pointer transition-colors shadow-3xs"
                           title="Remover cliente"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
 
                       </div>
@@ -629,19 +620,90 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
         )}
       </div>
 
-      {/* Info extra de rodapé da tabela */}
-      <div className="bg-slate-50/60 py-3.5 px-6 border-t border-slate-150 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-        <span>Mostrando <strong>{filteredClients.length}</strong> de <strong>{clients.length}</strong> assinantes inscritos</span>
-        <div className="flex gap-4">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Ativos: {clients.filter(c => c.status === 'Ativo').length}
+      {/* Info extra de rodapé da tabela com Paginação */}
+      <div className="bg-slate-50/80 py-3.5 px-4 sm:px-6 border-t border-slate-200 text-xs text-slate-600 flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Lado esquerdo: Contador de registros e resumo de status */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span>
+            Mostrando <strong>{filteredClients.length > 0 ? startIndex + 1 : 0}–{endIndex}</strong> de <strong>{filteredClients.length}</strong> assinantes
           </span>
-          <span className="flex items-center gap-1 border-l border-slate-200 pl-4">
-            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span> Pendentes: {clients.filter(c => c.status === 'Pendente').length}
-          </span>
-          <span className="flex items-center gap-1 border-l border-slate-200 pl-4">
-            <span className="w-2 h-2 rounded-full bg-rose-500"></span> Bloqueados: {clients.filter(c => c.status === 'Bloqueado').length}
-          </span>
+          <div className="hidden sm:flex items-center gap-3 border-l border-slate-300 pl-3 text-[11px]">
+            <span className="flex items-center gap-1 font-semibold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {clients.filter(c => c.status === 'Ativo').length} Ativos
+            </span>
+            <span className="flex items-center gap-1 font-semibold text-amber-700">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span> {clients.filter(c => c.status === 'Pendente').length} Pendentes
+            </span>
+            <span className="flex items-center gap-1 font-semibold text-rose-700">
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span> {clients.filter(c => c.status === 'Bloqueado').length} Bloqueados
+            </span>
+          </div>
+        </div>
+
+        {/* Lado direito: Seletor de registros por página e Navegação */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Seletor de itens por página */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <span>Exibir:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-800 font-bold focus:outline-hidden focus:border-blue-600 cursor-pointer text-xs"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          {/* Botões de Navegação de Página */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage(1)}
+                disabled={safeCurrentPage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                title="Primeira página"
+              >
+                <ChevronsLeft className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={safeCurrentPage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                title="Página anterior"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              <span className="px-2 py-1 text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg">
+                {safeCurrentPage} / {totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={safeCurrentPage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                title="Próxima página"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={safeCurrentPage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                title="Última página"
+              >
+                <ChevronsRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
