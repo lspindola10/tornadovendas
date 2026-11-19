@@ -475,16 +475,22 @@ export default function App() {
                 onClick={() => {
                   const link = `${window.location.origin}${window.location.pathname}?mode=cliente`;
                   navigator.clipboard.writeText(link);
+                  setCopiedLink(true);
                   setToastMessage({
                     text: 'Link de autocadastro copiado com sucesso! Envie aos clientes.',
                     type: 'success'
                   });
+                  setTimeout(() => setCopiedLink(false), 2500);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer shadow-3xs"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-3xs ${
+                  copiedLink
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                }`}
                 title="Copiar link oficial para o cliente assinar"
               >
-                <Copy className="w-3.5 h-3.5 text-blue-600" />
-                <span>Copiar Link de Vendas</span>
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-blue-600" />}
+                <span>{copiedLink ? 'Link Copiado!' : 'Copiar Link de Vendas'}</span>
               </button>
 
               <a
@@ -586,50 +592,31 @@ export default function App() {
               </div>
             )}
 
-            <div className="flex flex-col md:flex-row gap-6 items-stretch w-full mb-6">
+            {/* Botão de Ação: Novo Contrato Manual */}
+            <div className="w-full mb-6">
               <button 
                 onClick={() => setIsFormModalOpen(true)}
-                className="flex-1 bg-[#0B192C] hover:bg-[#0F223D] border border-[#1E293B] text-white rounded-2xl p-6 flex flex-col justify-center items-start shadow-sm hover:shadow-md transition-all group cursor-pointer"
+                className="w-full bg-[#0B192C] hover:bg-[#0F223D] border border-[#1E293B] text-white rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs hover:shadow-md transition-all group cursor-pointer text-left"
               >
-                 <div className="flex items-center gap-3 mb-2">
-                   <div className="bg-blue-600 p-2.5 rounded-xl group-hover:scale-105 shadow-sm shadow-blue-500/25 transition-transform text-white">
-                     <UserPlus className="w-6 h-6 text-white" />
-                   </div>
-                   <h3 className="text-xl font-black font-sans tracking-wide text-white">NOVO CONTRATO</h3>
-                 </div>
-                 <p className="text-slate-300 text-xs font-sans text-left">Clique aqui para abrir a ficha de cadastro e inserir um novo assinante manualmente.</p>
-              </button>
-              
-              <div className="flex-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs text-left flex flex-col justify-center">
-                <h4 className="text-xs font-extrabold text-blue-600 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
-                  <Users className="w-4 h-4 text-blue-600" /> Link de Autoatendimento
-                </h4>
-                <p className="text-xs text-slate-500 font-sans leading-relaxed mb-3">
-                  Copie e envie o link abaixo para seus clientes realizarem o próprio cadastro de forma autônoma e segura:
-                </p>
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={`${window.location.origin}${window.location.pathname}?mode=cliente`}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono text-slate-700 focus:outline-hidden"
-                    onClick={(e) => (e.target as HTMLInputElement).select()}
-                    title="Clique para selecionar tudo"
-                  />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?mode=cliente`);
-                      setCopiedLink(true);
-                      triggerToast('Link de cadastro copiado com sucesso!', 'success');
-                      setTimeout(() => setCopiedLink(false), 2500);
-                    }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer flex-shrink-0 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-600/20"
-                  >
-                    {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedLink ? 'Copiado!' : 'Copiar'}
-                  </button>
+                <div className="flex items-center gap-3.5">
+                  <div className="bg-blue-600 p-3 rounded-xl group-hover:scale-105 shadow-sm shadow-blue-500/25 transition-transform text-white shrink-0">
+                    <UserPlus className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-black font-sans tracking-wide text-white">
+                      NOVO CONTRATO
+                    </h3>
+                    <p className="text-slate-300 text-xs font-sans mt-0.5">
+                      Clique aqui para abrir a ficha de cadastro e inserir um novo assinante manualmente.
+                    </p>
+                  </div>
                 </div>
-              </div>
+
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 group-hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0">
+                  <UserPlus className="w-4 h-4" />
+                  <span>Cadastrar Assinante</span>
+                </div>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
