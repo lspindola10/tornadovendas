@@ -303,7 +303,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
         {/* Atalhos Rápidos de Período de Cadastro */}
         <div className="flex flex-wrap items-center gap-1.5 mb-4 pb-3 border-b border-slate-200/70">
           <span className="text-[11px] text-slate-500 font-bold font-sans whitespace-nowrap flex items-center gap-1 mr-1">
-            <Calendar className="w-3.5 h-3.5 text-orange-500" />
+            <Calendar className="w-3.5 h-3.5 text-blue-600" />
             Cadastrado em:
           </span>
           {[
@@ -322,7 +322,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
               onClick={() => setFilterPeriod(pill.id)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap border ${
                 filterPeriod === pill.id
-                  ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-orange-600 shadow-xs'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                   : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900'
               }`}
             >
@@ -336,7 +336,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
                 type="month"
                 value={customMonth}
                 onChange={(e) => setCustomMonth(e.target.value)}
-                className="py-1 px-2.5 text-xs rounded-lg border border-orange-300 bg-orange-50/50 text-slate-900 font-semibold focus:outline-hidden focus:ring-2 focus:ring-orange-500/20"
+                className="py-1 px-2.5 text-xs rounded-lg border border-blue-300 bg-blue-50/50 text-slate-900 font-semibold focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
               />
               {customMonth && (
                 <button
@@ -361,7 +361,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
               placeholder="Buscar por nome, cpf, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-hidden focus:border-cyan-550 focus:ring-1 focus:ring-cyan-505/10 transition-all font-sans"
+              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600/15 transition-all font-sans"
             />
           </div>
 
@@ -371,7 +371,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
             <select
               value={filterPlan}
               onChange={(e) => setFilterPlan(e.target.value)}
-              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-750 focus:outline-hidden transition-all focus:border-cyan-500"
+              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-hidden transition-all focus:border-blue-600 focus:ring-1 focus:ring-blue-600/15"
             >
               <option value="todos" className="bg-white text-slate-900">Todos os Planos</option>
               {PLANS.map(p => (
@@ -386,7 +386,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
             <select
               value={filterDueDate}
               onChange={(e) => setFilterDueDate(e.target.value)}
-              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-750 focus:outline-hidden transition-all focus:border-cyan-500"
+              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-hidden transition-all focus:border-blue-600 focus:ring-1 focus:ring-blue-600/15"
             >
               <option value="todos" className="bg-white text-slate-900">Todos os Dias</option>
               {DUE_DATES.map(date => (
@@ -397,11 +397,11 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
 
           {/* Filtro por Status da Conexão */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-slate-550 font-bold font-sans whitespace-nowrap">Status:</span>
+            <span className="text-[11px] text-slate-500 font-bold font-sans whitespace-nowrap">Status:</span>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-750 focus:outline-hidden transition-all focus:border-cyan-500"
+              className="w-full p-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-hidden transition-all focus:border-blue-600 focus:ring-1 focus:ring-blue-600/15"
             >
               <option value="todos" className="bg-white text-slate-900">Todos Status</option>
               <option value="Ativo" className="bg-white text-slate-900">Instalações Ativas</option>
@@ -656,7 +656,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cabeçalho do popup */}
-            <div className="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800">
+            <div className="bg-[#0B192C] text-white p-5 flex justify-between items-center border-b border-[#1E293B]">
               <div>
                 <span className="text-[10px] font-mono tracking-widest text-emerald-400 font-black uppercase flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -666,7 +666,7 @@ export default function ClientTable({ clients, onEdit, onDelete, onStatusChange,
               </div>
               <button 
                 onClick={handleCloseDetailModal} 
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800 border border-slate-700 transition-colors cursor-pointer"
+                className="text-slate-300 hover:text-white p-1.5 rounded-lg bg-[#0F223D] hover:bg-[#1E293B] border border-[#1E3A5F] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

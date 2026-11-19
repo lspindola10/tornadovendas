@@ -120,7 +120,7 @@ export default function UserManagement() {
         <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
             <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-indigo-600" />
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
               Gestão de Funcionários
             </h2>
             <p className="text-sm text-slate-500">Aprove ou revogue o acesso da sua equipe ao ERP.</p>
@@ -142,7 +142,7 @@ export default function UserManagement() {
             
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors whitespace-nowrap shadow-xs"
             >
               <Plus className="w-4 h-4" />
               Novo Funcionário
@@ -186,8 +186,8 @@ export default function UserManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-bold rounded-full ${
-                      user.role === 'admin' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-800'
+                    <span className={`px-2.5 py-1 inline-flex text-[10px] leading-5 font-bold rounded-full border ${
+                      user.role === 'admin' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-700 border-slate-200'
                     }`}>
                       {user.role === 'admin' ? 'Administrador' : 'Funcionário'}
                     </span>
@@ -282,7 +282,7 @@ export default function UserManagement() {
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
                   placeholder="Ex: João da Silva"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
@@ -296,7 +296,7 @@ export default function UserManagement() {
                   value={newUserUsername}
                   onChange={(e) => setNewUserUsername(e.target.value)}
                   placeholder="Ex: joao ou joao.silva"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <p className="mt-1 text-[11px] text-slate-500">
                   Esse é o nome que o funcionário vai digitar na tela de login.
@@ -315,7 +315,7 @@ export default function UserManagement() {
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-3 pr-10 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full pl-3 pr-10 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <button
                     type="button"
@@ -334,7 +334,7 @@ export default function UserManagement() {
                 <select
                   value={newUserRole}
                   onChange={(e) => setNewUserRole(e.target.value as 'admin' | 'employee')}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="employee">Funcionário (Apenas Portal de Vendas)</option>
                   <option value="admin">Administrador (Acesso Total)</option>
@@ -345,14 +345,14 @@ export default function UserManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm transition-colors"
+                  className="flex-1 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-sm transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm transition-colors flex items-center justify-center disabled:opacity-70"
+                  className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-xl text-sm transition-colors flex items-center justify-center disabled:opacity-70 cursor-pointer shadow-xs"
                 >
                   {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Criar Usuário'}
                 </button>

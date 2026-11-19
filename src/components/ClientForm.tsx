@@ -246,16 +246,16 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden" id="registration-form-card">
       
       {/* Banner Superior do Formulário */}
-      <div className="bg-slate-900 border-b border-slate-850 px-6 py-5 text-white flex items-center justify-between">
+      <div className="bg-[#0B192C] border-b border-[#1E293B] px-6 py-5 text-white flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="bg-indigo-500/10 border border-indigo-500/10 p-2 rounded-lg">
-            <UserPlus className="w-5 h-5 text-cyan-400" />
+          <div className="bg-[#0F223D] border border-[#1E3A5F] p-2 rounded-xl">
+            <UserPlus className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h2 className="text-sm sm:text-base font-bold font-sans tracking-tight text-white uppercase">
+            <h2 className="text-sm sm:text-base font-extrabold font-sans tracking-tight text-white uppercase">
               {editingClient ? 'Atualizar Assinante' : 'Novo Contrato'}
             </h2>
-            <p className="text-xs text-slate-350">
+            <p className="text-xs text-slate-300">
               {editingClient ? `Editando o cadastro de ID: ${editingClient.id}` : 'Insira os dados cadastrais do cliente'}
             </p>
           </div>
@@ -756,7 +756,7 @@ export default function ClientForm({ onSave, editingClient, onCancelEdit }: Clie
           )}
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-orange-500 via-orange-600 to-red-650 border border-orange-600 rounded-lg hover:opacity-95 transition-all shadow-md shadow-orange-500/10 cursor-pointer uppercase tracking-wider"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm shadow-blue-600/20 cursor-pointer uppercase tracking-wider"
           >
             <Save className="w-4 h-4 text-white" />
             {editingClient ? 'Salvar Alterações' : 'Confirmar e Ativar Cadastro'}

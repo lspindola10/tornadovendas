@@ -91,26 +91,26 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
 
   // 2. VISÃO DO PAINEL ADMINISTRATIVO (ERP DA EQUIPE)
   return (
-    <header className="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-40 shadow-md" id="admin-header">
+    <header className="bg-[#0B192C] border-b border-[#1E293B] text-white sticky top-0 z-40 shadow-md" id="admin-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           
           {/* Logo and Branding do Admin */}
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 shadow-md overflow-hidden group shrink-0">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-[#0F223D] border border-[#1E3A5F] shadow-md overflow-hidden group shrink-0">
               <img src={logoImg} alt="Logo Tornado" className="w-8 h-8 object-contain" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0B192C]"></div>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-black tracking-tight uppercase font-sans">
                   <span className="text-white">Tornado</span> <span className="text-orange-500">Fibra</span>
                 </h1>
-                <span className="text-[9px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded bg-slate-800 text-orange-400 border border-slate-700">
+                <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-md bg-[#0F223D] text-blue-300 border border-[#1E3A5F]">
                   ERP Vendas
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-sans font-medium">
+              <p className="text-[11px] text-slate-300 font-sans font-medium">
                 Gestão de Contratos e Autoatendimento
               </p>
             </div>
@@ -118,36 +118,36 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
 
           {/* Métricas do Topo e Perfil */}
           <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3 text-sm">
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <Router className="w-4 h-4 text-cyan-400" />
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0F223D]/90 border border-[#1E3A5F]">
+              <Router className="w-4 h-4 text-blue-400" />
               <div className="text-xs">
                 <span className="block text-[9px] uppercase font-mono tracking-wider text-slate-400">Assinantes</span>
                 <span className="font-bold text-white">{clientCount} Ativos</span>
               </div>
             </div>
 
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0F223D]/90 border border-[#1E3A5F]">
               <Database className="w-4 h-4 text-emerald-400" />
               <div className="text-xs">
                 <span className="block text-[9px] uppercase font-mono tracking-wider text-slate-400">Faturamento</span>
-                <span className="font-bold text-emerald-300">
+                <span className="font-bold text-emerald-400">
                   {totalMrr.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </span>
               </div>
             </div>
 
             {/* Informações do Usuário e Botão de Sair */}
-            <div className="flex items-center gap-3 pl-0 lg:pl-3 lg:border-l border-slate-700/60">
+            <div className="flex items-center gap-3 pl-0 lg:pl-3 lg:border-l border-[#1E293B]">
               {appUser && (
                 <>
                   <div className="text-right hidden sm:block text-xs">
-                    <span className="block font-bold text-white">{appUser.name}</span>
+                    <span className="block font-bold text-white tracking-wide">{appUser.name}</span>
                     <span className="block text-[10px] text-slate-400 flex items-center justify-end gap-1">
                       {appUser.role === 'admin' && <ShieldCheck className="w-3 h-3 text-amber-400" />}
                       {appUser.role === 'admin' ? 'Administrador' : 'Colaborador'}
                     </span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-slate-750 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shadow-inner">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 border border-blue-400/30 flex items-center justify-center font-black text-white text-xs shadow-sm">
                     {appUser.name.charAt(0).toUpperCase()}
                   </div>
                 </>
@@ -155,7 +155,7 @@ export default function Header({ clientCount, totalMrr, isAdmin = true }: Header
               
               <button
                 onClick={logout}
-                className="p-1.5 sm:px-2.5 sm:py-1.5 bg-slate-800 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 border border-slate-700 rounded-xl text-slate-300 transition-colors flex items-center gap-1.5 font-bold text-xs cursor-pointer"
+                className="p-1.5 sm:px-2.5 sm:py-1.5 bg-[#0F223D] hover:bg-rose-500/15 hover:text-rose-300 hover:border-rose-500/30 border border-[#1E3A5F] rounded-xl text-slate-300 transition-colors flex items-center gap-1.5 font-bold text-xs cursor-pointer"
                 title="Sair do sistema"
               >
                 <LogOut className="w-3.5 h-3.5" />

@@ -421,15 +421,17 @@ export default function App() {
               {/* Aba: Painel de Vendas */}
               <button
                 onClick={() => setViewMode('admin')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-black transition-all cursor-pointer text-xs ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all cursor-pointer text-xs ${
                   viewMode === 'admin'
-                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    ? 'bg-blue-600 text-white shadow-xs border border-blue-600'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Monitor className={`w-4 h-4 ${viewMode === 'admin' ? 'text-blue-600' : 'text-slate-400'}`} />
+                <Monitor className={`w-4 h-4 ${viewMode === 'admin' ? 'text-white' : 'text-slate-400'}`} />
                 <span>Painel de Vendas</span>
-                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-md font-mono">
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                  viewMode === 'admin' ? 'bg-blue-700/80 text-white' : 'bg-slate-200/80 text-slate-600'
+                }`}>
                   {clients.length}
                 </span>
               </button>
@@ -438,13 +440,13 @@ export default function App() {
               {appUser?.role === 'admin' && (
                 <button
                   onClick={() => setViewMode('users')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-black transition-all cursor-pointer text-xs ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all cursor-pointer text-xs ${
                     viewMode === 'users'
-                      ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                      ? 'bg-blue-600 text-white shadow-xs border border-blue-600'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
-                  <ShieldCheck className={`w-4 h-4 ${viewMode === 'users' ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <ShieldCheck className={`w-4 h-4 ${viewMode === 'users' ? 'text-white' : 'text-slate-400'}`} />
                   <span>Gestão de Equipe</span>
                 </button>
               )}
@@ -455,13 +457,13 @@ export default function App() {
                   setViewMode('customer');
                   setEditingClient(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-black transition-all cursor-pointer text-xs ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all cursor-pointer text-xs ${
                   viewMode === 'customer'
-                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    ? 'bg-blue-600 text-white shadow-xs border border-blue-600'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Eye className={`w-4 h-4 ${viewMode === 'customer' ? 'text-orange-500' : 'text-slate-400'}`} />
+                <Eye className={`w-4 h-4 ${viewMode === 'customer' ? 'text-white' : 'text-slate-400'}`} />
                 <span>Visualizar Portal</span>
               </button>
             </div>
@@ -489,10 +491,10 @@ export default function App() {
                 href={`${window.location.origin}${window.location.pathname}?mode=cliente`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-colors cursor-pointer shadow-3xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-3xs"
                 title="Abrir a visão do cliente em uma nova aba"
               >
-                <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                <ExternalLink className="w-3.5 h-3.5 text-white" />
                 <span>Abrir Portal</span>
               </a>
             </div>
@@ -587,20 +589,20 @@ export default function App() {
             <div className="flex flex-col md:flex-row gap-6 items-stretch w-full mb-6">
               <button 
                 onClick={() => setIsFormModalOpen(true)}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl p-6 flex flex-col justify-center items-start shadow-sm hover:shadow-md transition-all group cursor-pointer"
+                className="flex-1 bg-[#0B192C] hover:bg-[#0F223D] border border-[#1E293B] text-white rounded-2xl p-6 flex flex-col justify-center items-start shadow-sm hover:shadow-md transition-all group cursor-pointer"
               >
                  <div className="flex items-center gap-3 mb-2">
-                   <div className="bg-blue-500/20 p-2.5 rounded-xl group-hover:bg-blue-500/30 transition-colors">
-                     <UserPlus className="w-6 h-6 text-blue-400" />
+                   <div className="bg-blue-600 p-2.5 rounded-xl group-hover:scale-105 shadow-sm shadow-blue-500/25 transition-transform text-white">
+                     <UserPlus className="w-6 h-6 text-white" />
                    </div>
-                   <h3 className="text-xl font-bold font-sans tracking-wide">NOVO CONTRATO</h3>
+                   <h3 className="text-xl font-black font-sans tracking-wide text-white">NOVO CONTRATO</h3>
                  </div>
-                 <p className="text-slate-400 text-sm font-sans text-left">Clique aqui para abrir a ficha de cadastro e inserir um novo assinante manualmente.</p>
+                 <p className="text-slate-300 text-xs font-sans text-left">Clique aqui para abrir a ficha de cadastro e inserir um novo assinante manualmente.</p>
               </button>
               
-              <div className="flex-1 bg-white p-6 rounded-2xl border border-slate-205 shadow-sm text-left flex flex-col justify-center">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-1.5 text-blue-600 mb-2.5">
-                  <Users className="w-4 h-4 text-blue-500" /> Link de Autoatendimento
+              <div className="flex-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs text-left flex flex-col justify-center">
+                <h4 className="text-xs font-extrabold text-blue-600 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
+                  <Users className="w-4 h-4 text-blue-600" /> Link de Autoatendimento
                 </h4>
                 <p className="text-xs text-slate-500 font-sans leading-relaxed mb-3">
                   Copie e envie o link abaixo para seus clientes realizarem o próprio cadastro de forma autônoma e segura:
@@ -610,7 +612,7 @@ export default function App() {
                     type="text" 
                     readOnly 
                     value={`${window.location.origin}${window.location.pathname}?mode=cliente`}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono text-slate-600 focus:outline-hidden"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono text-slate-700 focus:outline-hidden"
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                     title="Clique para selecionar tudo"
                   />
@@ -621,7 +623,7 @@ export default function App() {
                       triggerToast('Link de cadastro copiado com sucesso!', 'success');
                       setTimeout(() => setCopiedLink(false), 2500);
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 cursor-pointer flex-shrink-0 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-600/20"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer flex-shrink-0 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-600/20"
                   >
                     {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiedLink ? 'Copiado!' : 'Copiar'}
@@ -661,10 +663,10 @@ export default function App() {
 
       {/* Modal Notification para Detalhes do Cliente */}
       {notificationClient && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up relative">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up relative border border-slate-200">
             {/* Cabeçalho */}
-            <div className="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800">
+            <div className="bg-[#0B192C] text-white p-5 flex justify-between items-center border-b border-[#1E293B]">
               <div className="text-left">
                 <span className="text-[10px] font-mono tracking-widest text-emerald-400 font-black uppercase flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -674,7 +676,7 @@ export default function App() {
               </div>
               <button 
                 onClick={() => { setNotificationClient(null); setModalIxcError(null); }} 
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800 border border-slate-700 transition-colors cursor-pointer"
+                className="text-slate-300 hover:text-white p-1.5 rounded-lg bg-[#0F223D] hover:bg-[#1E293B] border border-[#1E3A5F] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -884,7 +886,7 @@ export default function App() {
             <div className="bg-slate-50 px-6 py-4 border-t border-slate-150 flex justify-end">
               <button
                 onClick={() => { setNotificationClient(null); setModalIxcError(null); }}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                className="px-4 py-2 bg-[#0B192C] hover:bg-[#0F223D] text-white rounded-xl text-xs font-bold cursor-pointer transition-colors"
               >
                 Voltar à Lista
               </button>
@@ -900,7 +902,7 @@ export default function App() {
           <div className="bg-transparent w-full max-w-4xl max-h-[95vh] overflow-y-auto relative rounded-3xl pb-10">
             <button 
               onClick={() => { setIsFormModalOpen(false); setEditingClient(null); }} 
-              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 z-10 transition-colors shadow-md cursor-pointer"
+              className="absolute top-4 right-4 p-2 bg-[#0F223D] hover:bg-[#1E293B] border border-[#1E3A5F] rounded-full text-slate-200 z-10 transition-colors shadow-md cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
